@@ -42,11 +42,3 @@ pub const MASK: [64][4][2]u64 = init: {
         m.* = mask(@intCast(u6, i));
     break :init ret;
 };
-
-fn mask2() [64][4][2]u64 {
-    var ret: [64][4][2]u64 = undefined;
-    var i:u3 = 0;
-    while(true){
-        
-    }
-}
