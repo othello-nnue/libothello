@@ -18,7 +18,7 @@ pub fn build(b: *std.build.Builder) void {
         lib.install();
 
         var main_tests = b.addTest("game/test.zig");
-        main_tests.setBuildMode(mode);
+        main_tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
 
         var lut_tests = b.addTest("game/lut/test.zig");
         lut_tests.setBuildMode(mode);
@@ -43,6 +43,24 @@ pub fn build(b: *std.build.Builder) void {
         }
 
         const run_step = b.step("run", "Run the app");
+        run_step.dependOn(&run_cmd.step);
+    }
+    {
+        const exe = b.addExecutable("perf", "perf/main.zig");
+        exe.setTarget(target);
+        exe.setBuildMode(std.builtin.Mode.ReleaseFast);
+
+        exe.addPackagePath("othello", "game/main.zig");
+        exe.addPackagePath("bench", "zig-bench/bench.zig");
+        exe.install();
+
+        const run_cmd = exe.run();
+        run_cmd.step.dependOn(b.getInstallStep());
+        if (b.args) |args| {
+            run_cmd.addArgs(args);
+        }
+
+        const run_step = b.step("bench", "Run benchmark tests");
         run_step.dependOn(&run_cmd.step);
     }
 }

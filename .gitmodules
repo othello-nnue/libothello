@@ -1,3 +1,6 @@
 [submodule "zbox"]
 	path = zbox
 	url = https://github.com/jessrud/zbox.git
+[submodule "zig-bench"]
+	path = zig-bench
+	url = https://github.com/Hejsil/zig-bench.git

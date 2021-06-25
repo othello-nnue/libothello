@@ -8,7 +8,6 @@ Move generation is implemented with the Kogge-Stone Algorithm, intended to compi
 
 1. AVX512 instructions cause significant frequency throttling, resulting in a performance degradation in mixed workload. 
 2. [Zig](ziglang.org)'s SIMD is not documented well currently. 
-3. I didn't implement micro-benchmarking yet, so I can't even grasp about performance improvement/regression. 
 
 Therefore, for now it relies mainly on LLVM's auto vectorization. 
 

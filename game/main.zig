@@ -1,3 +1,5 @@
+const assert = @import("std").debug.assert;
+
 pub fn init() [2]u64 {
     return [2]u64{ 0x0000_0008_1000_0000, 0x0000_0010_0800_0000 };
 }
@@ -19,6 +21,7 @@ fn gen(board: [2]u64, comptime dir: u6) u64 {
 }
 
 pub fn moves(board: [2]u64) u64 {
+    assert(board[0] & board[1] == 0);
     var ret: u64 = 0;
     inline for (.{ 1, 7, 8, 9 }) |i|
         ret |= gen(board, i);
@@ -33,6 +36,7 @@ const INDEX = @import("lut/index.zig").INDEX;
 const RESULT = @import("lut/test.zig").known;
 
 pub fn move(board: [2]u64, place: u6) u64 {
+    assert(board[0] & board[1] == 0);
     var ret: u64 = 0;
     comptime var i = 0;
     inline while (i < 4) : (i += 1)

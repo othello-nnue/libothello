@@ -9,26 +9,25 @@ test "init test" {
 }
 
 test "perft test" {
-    comptime var i = 0;
-    inline while (i < 12) : (i += 1) {
-        try expect(perft(game.init(), i) == known_perft[i]);
+    inline for (known_perft) |known, i| {
+        try expect((try perft(game.init(), i)) == known);
         print("passed perft {}\n", .{i});
     }
 }
 
-fn perft(board: [2]u64, depth: usize) u64 {
-    if (depth == 0) return 1;
+fn perft(board: [2]u64, depth: usize) anyerror!u64 {
+    if (depth == 0) return @as(u64, 1);
     var moves = game.moves(board);
     if (moves == 0)
         return perft(.{ board[1], board[0] }, depth - 1);
-    if (depth == 1) return @popCount(u64, moves);
+    if (depth == 1) return @as(u64, @popCount(u64, moves));
     var sum: u64 = 0;
     while (moves != 0) {
         const i = @intCast(u6, @ctz(u64, moves));
         const t = game.move(board, i);
-        //try expect(t != 0);
+        try expect(t != 0);
         moves ^= @as(u64, 1) << i;
-        sum += perft(.{ board[1] ^ t, board[0] ^ t ^ (@as(u64, 1) << i) }, depth - 1);
+        sum += try perft(.{ board[1] ^ t, board[0] ^ t ^ (@as(u64, 1) << i) }, depth - 1);
     }
     return sum;
 }

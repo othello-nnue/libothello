@@ -2,6 +2,14 @@ const std = @import("std");
 const zbox = @import("zbox");
 const othello = @import("othello");
 
+const bytes = ".ox*@OX@";
+
+var x: u3 = 0;
+var y: u3 = 0;
+var z: u1 = 0;
+
+var game = othello.init();
+
 pub fn main() anyerror!void {
     const alloc = std.heap.page_allocator;
 
@@ -13,15 +21,16 @@ pub fn main() anyerror!void {
     try zbox.cursorHide();
     defer zbox.cursorShow() catch {};
 
-    var game = othello.init();
     var output = try zbox.Buffer.init(alloc, 8, 8);
-
-    var x: u3 = 0;
-    var y: u3 = 0;
-
     defer output.deinit();
+
+    render(&output);
+    try zbox.push(output);
+
     while (try zbox.nextEvent()) |e| {
         switch (e) {
+            .escape => return,
+            .tick => continue,
             .left => x -%= 1,
             .right => x +%= 1,
             .down => y +%= 1,
@@ -30,36 +39,37 @@ pub fn main() anyerror!void {
                 const eql = std.mem.eql;
                 if (eql(u8, " ", data)) {
                     const t = @as(u6, x) * 8 + y;
-                    const u = othello.move(gamet, t);
+                    if (@as(u64, 1) << t & (game[0] | game[1]) != 0) continue;
+                    const u = othello.move(game, t);
                     if (u != 0) {
                         const temp = game;
                         game = .{ temp[1] ^ u, temp[0] ^ u ^ (@as(u64, 1) << t) };
+                        z ^= 1;
                     }
-                }
+                } else continue;
             },
-
-            .escape => return,
-            else => {},
         }
-        output.clear();
-        output.cellRef(y, x).char = 'a';
-        {
-            const t = othello.moves(game);
-            var i: u7 = 0;
-            while (i < 64) : (i += 1) {
-                const j = @as(u64, 1) << @intCast(u6, i);
-                const k = @truncate(u3, i);
-                const l = @truncate(u3, i >> 3);
-                if (game[0] & j != 0) {
-                    output.cellRef(k, l).char = 'O';
-                } else if (game[1] & j != 0) {
-                    output.cellRef(k, l).char = 'X';
-                } else if (t & j != 0) {
-                    output.cellRef(k, l).char = '*';
-                }
-            }
-        }
-
+        render(&output);
         try zbox.push(output);
+    }
+}
+
+fn render(output: *zbox.Buffer) void {
+    output.clear();
+    const t = othello.moves(game);
+    var i: u7 = 0;
+    while (i < 64) : (i += 1) {
+        const j = @as(u64, 1) << @intCast(u6, i);
+        var k: u3 = 0;
+        if (game[z] & j != 0) {
+            k = 1;
+        } else if (game[~z] & j != 0) {
+            k = 2;
+        } else if (t & j != 0)
+            k = 3;
+
+        if (@as(u6, x) * 8 + y == i) k += 4;
+
+        output.*.cellRef(@truncate(u3, i), @truncate(u3, i >> 3)).char = bytes[k];
     }
 }
