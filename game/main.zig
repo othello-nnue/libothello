@@ -45,3 +45,5 @@ pub fn move(board: [2]u64, place: u6) u64 {
         ], MASK[place][i][1]);
     return ret;
 }
+
+pub const Game = @import("./wrapper.zig").Game;

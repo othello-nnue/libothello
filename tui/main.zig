@@ -12,7 +12,7 @@ var x: u3 = 0;
 var y: u3 = 0;
 var z: u1 = 0;
 
-var game = othello.init();
+var game = othello.Game{};
 
 pub fn main() anyerror!void {
     const original_termios = try rawmode();
@@ -32,13 +32,10 @@ pub fn main() anyerror!void {
             'B', 'J', 'j', 's' => y +%= 1,
             'A', 'K', 'k', 'w' => y -%= 1,
             ' ' => {
-                const t = @as(u6, y) * 8 + x;
-                if (@as(u64, 1) << t & (game[0] | game[1]) != 0) continue;
-                const u = othello.move(game, t);
-                if (u == 0) continue;
-                const temp = game;
-                game = .{ temp[1] ^ u, temp[0] ^ u ^ (@as(u64, 1) << t) };
-                z ^= 1;
+                if (game.move(@as(u6, y) * 8 + x)) |newgame| {
+                    game = newgame;
+                    z ^= 1;
+                } else continue;
             },
             else => continue,
         }
@@ -75,18 +72,18 @@ const bytes = ".ox*@OX@";
 
 fn render() !void {
     var out = ("\x1B[1;1H" ++ ("." ** 8 ++ "\n") ** 8).*;
-    const t = othello.moves(game);
+    var moves = game.moves();
+
     var i: u7 = 0;
     while (i < 64) : (i += 1) {
         const j = @as(u64, 1) << @intCast(u6, i);
         var k: u3 = 0;
-        if (game[z] & j != 0) {
+        if (game.board[z] & j != 0) {
             k = 1;
-        } else if (game[~z] & j != 0) {
+        } else if (game.board[~z] & j != 0) {
             k = 2;
-        } else if (t & j != 0)
+        } else if (moves & j != 0)
             k = 3;
-
         if (@as(u6, y) * 8 + x == i) k += 4;
 
         out[i + "\x1B[1;1H".len + (i >> 3)] = bytes[k];
