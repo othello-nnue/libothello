@@ -1,8 +1,12 @@
 const std = @import("std");
-const zbox = @import("zbox");
 const othello = @import("othello");
 
-const bytes = ".ox*@OX@";
+const os = std.os;
+const stdin = std.io.getStdIn();
+const stdout = std.io.getStdOut();
+
+const VTIME = 5;
+const VMIN = 6;
 
 var x: u3 = 0;
 var y: u3 = 0;
@@ -11,51 +15,66 @@ var z: u1 = 0;
 var game = othello.init();
 
 pub fn main() anyerror!void {
-    const alloc = std.heap.page_allocator;
+    const original_termios = try rawmode();
+    defer os.tcsetattr(stdin.handle, .FLUSH, original_termios) catch {};
 
-    // initialize the zbox with stdin/out
-    try zbox.init(alloc);
-    defer zbox.deinit();
+    try stdout.writeAll("\x1B[?25l\x1B[2J"); //hide cursor, clear screen
+    defer stdout.writeAll("\x1B[?25h") catch {}; //show cursor
 
-    //try zbox.handleSignalInput();
-    try zbox.cursorHide();
-    defer zbox.cursorShow() catch {};
-
-    var output = try zbox.Buffer.init(alloc, 8, 8);
-    defer output.deinit();
-
-    render(&output);
-    try zbox.push(output);
-
-    while (try zbox.nextEvent()) |e| {
-        switch (e) {
-            .escape => return,
-            .tick => continue,
-            .left => x -%= 1,
-            .right => x +%= 1,
-            .down => y +%= 1,
-            .up => y -%= 1,
-            .other => |data| {
-                const eql = std.mem.eql;
-                if (eql(u8, " ", data)) {
-                    const t = @as(u6, x) * 8 + y;
-                    if (@as(u64, 1) << t & (game[0] | game[1]) != 0) continue;
-                    const u = othello.move(game, t);
-                    if (u != 0) {
-                        const temp = game;
-                        game = .{ temp[1] ^ u, temp[0] ^ u ^ (@as(u64, 1) << t) };
-                        z ^= 1;
-                    }
-                } else continue;
+    try render();
+    var buff: [1]u8 = undefined;
+    while (true) {
+        _ = try stdin.read(&buff);
+        switch (buff[0]) {
+            'q' => return,
+            'D', 'H', 'h', 'a' => x -%= 1,
+            'C', 'L', 'l', 'd' => x +%= 1,
+            'B', 'J', 'j', 's' => y +%= 1,
+            'A', 'K', 'k', 'w' => y -%= 1,
+            ' ' => {
+                const t = @as(u6, y) * 8 + x;
+                if (@as(u64, 1) << t & (game[0] | game[1]) != 0) continue;
+                const u = othello.move(game, t);
+                if (u == 0) continue;
+                const temp = game;
+                game = .{ temp[1] ^ u, temp[0] ^ u ^ (@as(u64, 1) << t) };
+                z ^= 1;
             },
+            else => continue,
         }
-        render(&output);
-        try zbox.push(output);
+        try render();
     }
 }
 
-fn render(output: *zbox.Buffer) void {
-    output.clear();
+//rawmode but with OPOST
+fn rawmode() !os.termios {
+    var termios = try os.tcgetattr(stdin.handle);
+    var original_termios = termios;
+
+    //man 3 termios
+    termios.iflag &= ~@as(
+        os.tcflag_t,
+        os.IGNBRK | os.BRKINT | os.PARMRK | os.ISTRIP |
+            os.INLCR | os.IGNCR | os.ICRNL | os.IXON,
+    );
+    termios.lflag &= ~@as(
+        os.tcflag_t,
+        os.ECHO | os.ECHONL | os.ICANON | os.ISIG | os.IEXTEN,
+    );
+    termios.cflag &= ~@as(os.tcflag_t, os.CSIZE | os.PARENB);
+    termios.cflag |= os.CS8;
+
+    termios.cc[VMIN] = 1;
+    termios.cc[VTIME] = 0;
+
+    try os.tcsetattr(stdin.handle, .FLUSH, termios);
+    return original_termios;
+}
+
+const bytes = ".ox*@OX@";
+
+fn render() !void {
+    var out = ("\x1B[1;1H" ++ ("." ** 8 ++ "\n") ** 8).*;
     const t = othello.moves(game);
     var i: u7 = 0;
     while (i < 64) : (i += 1) {
@@ -68,8 +87,9 @@ fn render(output: *zbox.Buffer) void {
         } else if (t & j != 0)
             k = 3;
 
-        if (@as(u6, x) * 8 + y == i) k += 4;
+        if (@as(u6, y) * 8 + x == i) k += 4;
 
-        output.*.cellRef(@truncate(u3, i), @truncate(u3, i >> 3)).char = bytes[k];
+        out[i + "\x1B[1;1H".len + (i >> 3)] = bytes[k];
     }
+    try stdout.writeAll(&out);
 }

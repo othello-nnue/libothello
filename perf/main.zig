@@ -1,6 +1,7 @@
 const std = @import("std");
 const othello = @import("othello");
 const bench = @import("bench");
+const expect = @import("std").testing.expect;
 
 fn perft(board: [2]u64, depth: usize) u64 {
     if (depth == 0) return 1;
@@ -18,6 +19,57 @@ fn perft(board: [2]u64, depth: usize) u64 {
     }
     return sum;
 }
+
+fn check(board: [2]u64, depth: usize) bool {
+    if (depth == 0) return false;
+    var moves = othello.moves(board);
+
+    var i: u6 = 0;
+    var j: u64 = 1;
+    while (j != 0) : ({
+        j <<= 1;
+        i +%= 1;
+    }) {
+        if ((board[0] | board[1]) & j != 0) continue;
+        const t = othello.move(board, i);
+
+        if ((t == 0) != (moves & j == 0)) return true;
+        if (t == 0) continue;
+        if (check(.{ board[1] ^ t, board[0] ^ t ^ j }, depth - 1)) return true;
+    }
+    return check(.{ board[1], board[0] }, depth - 1);
+}
+
+test "init test" {
+    const i = othello.init();
+    const j = othello.moves(i);
+    try expect(j == 17729692631040);
+}
+
+test "perft test" {
+    inline for (known_perft) |known, i|
+        try expect(perft(othello.init(), i) == known);
+}
+
+test "check test" {
+    try expect(!check(othello.init(), 11));
+}
+
+const known_perft = .{
+    1,
+    4,
+    12,
+    56,
+    244,
+    1396,
+    8200,
+    55092,
+    390216,
+    3005288,
+    24571284,
+    212258800,
+    1939886636,
+};
 
 pub fn main() anyerror!void {
     try bench.benchmark(struct {
