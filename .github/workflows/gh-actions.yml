@@ -1,0 +1,19 @@
+name: GitHub CI
+on: [push]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: goto-bus-stop/setup-zig@v1
+        with:
+          version: master
+        
+      - name: Run Tests
+        run: zig build test
+      - name: Run Bench
+        run: zig build bench
+      - name: Run Tests
+        run: zig fmt --check **.zig

@@ -30,7 +30,6 @@ pub fn build(b: *std.build.Builder) void {
         exe.setBuildMode(mode);
 
         exe.addPackagePath("othello", "game/main.zig");
-        exe.addPackagePath("zbox", "zbox/src/box.zig");
         exe.addPackagePath("engine", "engine/main.zig");
         exe.install();
 
@@ -50,20 +49,16 @@ pub fn build(b: *std.build.Builder) void {
 
         exe.addPackagePath("othello", "game/main.zig");
         exe.addPackagePath("bench", "zig-bench/bench.zig");
-        exe.install();
 
         const run_cmd = exe.run();
         run_cmd.step.dependOn(b.getInstallStep());
-        if (b.args) |args| {
-            run_cmd.addArgs(args);
-        }
 
         const run_step = b.step("bench", "Run benchmark tests");
         run_step.dependOn(&run_cmd.step);
     }
     {
         var tests = b.addTest("perf/main.zig");
-        //tests.setTarget(target);
+        tests.setTarget(target);
         tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
 
         tests.addPackagePath("othello", "game/main.zig");
