@@ -9,11 +9,11 @@ jobs:
           submodules: true
       - uses: goto-bus-stop/setup-zig@v1
         with:
-          version: master
+          version: 0.8.0
         
       - name: Run Tests
         run: zig build test
       - name: Run Bench
         run: zig build bench
-      - name: Run Tests
+      - name: Check Formatting
         run: zig fmt --check **.zig
