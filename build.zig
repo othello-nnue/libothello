@@ -1,4 +1,6 @@
 const std = @import("std");
+const Pkg = std.build.Pkg;
+const F = std.build.FileSource;
 
 pub fn build(b: *std.build.Builder) void {
     // Standard target options allows the person running `zig build` to choose
@@ -11,6 +13,20 @@ pub fn build(b: *std.build.Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
+    const othello = Pkg{
+        .name = "othello",
+        .path = F{ .path = "game/main.zig" },
+    };
+    const bench = Pkg{
+        .name = "bench",
+        .path = F{ .path = "zig-bench/bench.zig" },
+    };
+    const engine = Pkg{
+        .name = "engine",
+        .path = F{ .path = "engine/main.zig" },
+        .dependencies = &.{othello},
+    };
+
     {
         const lib = b.addStaticLibrary("othello", "game/main.zig");
         lib.setTarget(target);
@@ -19,7 +35,7 @@ pub fn build(b: *std.build.Builder) void {
     }
     {
         const lib = b.addStaticLibrary("engine", "engine/main.zig");
-        lib.addPackagePath("othello", "game/main.zig");
+        lib.addPackage(othello);
         lib.setTarget(target);
         lib.setBuildMode(mode);
         lib.install();
@@ -29,8 +45,8 @@ pub fn build(b: *std.build.Builder) void {
         exe.setTarget(target);
         exe.setBuildMode(mode);
 
-        exe.addPackagePath("othello", "game/main.zig");
-        exe.addPackagePath("engine", "engine/main.zig");
+        exe.addPackage(othello);
+        exe.addPackage(engine);
         exe.install();
 
         const run_cmd = exe.run();
@@ -47,8 +63,8 @@ pub fn build(b: *std.build.Builder) void {
         exe.setTarget(target);
         exe.setBuildMode(std.builtin.Mode.ReleaseFast);
 
-        exe.addPackagePath("othello", "game/main.zig");
-        exe.addPackagePath("bench", "zig-bench/bench.zig");
+        exe.addPackage(othello);
+        exe.addPackage(bench);
 
         const run_cmd = exe.run();
         run_cmd.step.dependOn(b.getInstallStep());
@@ -61,8 +77,8 @@ pub fn build(b: *std.build.Builder) void {
         tests.setTarget(target);
         tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
 
-        tests.addPackagePath("othello", "game/main.zig");
-        tests.addPackagePath("bench", "zig-bench/bench.zig");
+        tests.addPackage(othello);
+        tests.addPackage(bench);
 
         const test_step = b.step("test", "Run library tests");
         test_step.dependOn(&tests.step);

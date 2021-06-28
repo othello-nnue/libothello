@@ -1,5 +1,6 @@
 const std = @import("std");
 const othello = @import("othello");
+const engine = @import("engine");
 
 const os = std.os;
 const stdin = std.io.getStdIn();
@@ -23,7 +24,17 @@ pub fn main() anyerror!void {
 
     try render();
     var buff: [1]u8 = undefined;
-    while (true) {
+    while (!game.end()) {
+        if (game.moves() == 0) {
+            game = game.pass();
+            z ^= 1;
+        }
+        if (z == 1) {
+            game = game.move(engine.simple(game, engine.evals.mobility)).?;
+            z ^= 1;
+            try render();
+            continue;
+        }
         _ = try stdin.read(&buff);
         switch (buff[0]) {
             'q' => return,
@@ -40,6 +51,14 @@ pub fn main() anyerror!void {
             else => continue,
         }
         try render();
+    }
+    var u = game.score();
+    if (z == 1) u = -u;
+    switch (u) {
+        1...32 => try stdout.writeAll("O wins"),
+        0 => try stdout.writeAll("Draw"),
+        -32...-1 => try stdout.writeAll("X wins"),
+        else => unreachable,
     }
 }
 

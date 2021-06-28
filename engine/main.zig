@@ -1,22 +1,23 @@
 const othello = @import("othello");
+pub const evals = @import("./eval.zig");
 
-pub fn simple_engine(board: [2]u64) struct { move: u6, board: [2]u64 } {
-    var x = othello.moves(board);
+pub fn simple(game: othello.Game, comptime eval: fn (othello.Game) i64) u6 {
+    var moves = game.moves();
     var ret: u6 = 0;
-    var min: u7 = 64;
-    var ret2: [2]u64 = undefined;
-    while (x != 0) {
+    var min: i64 = 64; //should change
+    while (moves != 0) {
         const i = @intCast(u6, @ctz(u64, moves));
-        const t = othello.move(board, i);
-
-        moves ^= @as(u64, 1) << i;
-        const j = .{ board[1] ^ t, board[0] ^ t ^ (@as(u64, 1) << i) };
-        const k = @popCount(u64, othello.moves(j));
-        if (k < min) {
-            min = k;
+        moves &= moves - 1;
+        const j = eval(game.move(i).?);
+        if (j < min) {
+            min = j;
             ret = i;
-            ret2 = j;
         }
     }
-    return .{ .move = ret, .board = ret2 };
+    return ret;
 }
+
+//pub fn minimax(game: othello.Game, comptime eval: fn (othello.Game) i64, depth : u64) i64 {
+//minimax with memory
+//mtdf with memory
+//etc
