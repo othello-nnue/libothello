@@ -1,4 +1,5 @@
 const othello = @import("./main.zig");
+const assert = @import("std").debug.assert;
 
 pub const Game = struct {
     const Self = @This();
@@ -13,11 +14,15 @@ pub const Game = struct {
         if (@as(u64, 1) << place & (self.board[0] | self.board[1]) != 0) return null;
         const t = othello.move(self.board, place);
         if (t == 0) return null;
-        return Self{ .board = .{ self.board[1] ^ t, self.board[0] ^ t ^ (@as(u64, 1) << place) } };
+        const ret = Self{ .board = .{ self.board[1] ^ t, self.board[0] ^ t ^ (@as(u64, 1) << place) } };
+        assert(ret.board[0] & ret.board[1] == 0);
+        return ret;
     }
 
     pub fn pass(self: Self) Self {
-        return Self{ .board = .{ self.board[1], self.board[0] } };
+        const ret = Self{ .board = .{ self.board[1], self.board[0] } };
+        assert(ret.board[0] & ret.board[1] == 0);
+        return ret;
     }
 
     pub fn end(self: Self) bool {

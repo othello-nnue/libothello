@@ -13,6 +13,8 @@ var x: u3 = 0;
 var y: u3 = 0;
 var z: u1 = 0;
 
+var seq = [_]u8{255} ** 64;
+
 var game = othello.Game{};
 
 pub fn main() anyerror!void {
@@ -30,7 +32,9 @@ pub fn main() anyerror!void {
             z ^= 1;
         }
         if (z == 1) {
-            game = game.move(engine.absearch(game, engine.evals.mobility, 8)).?;
+            const move = engine.absearch(game, engine.evals.mobility, 8);
+            seq[@popCount(u64, game.board[0] | game.board[1])] = move;
+            game = game.move(move).?;
             z ^= 1;
 
             continue;
@@ -45,6 +49,7 @@ pub fn main() anyerror!void {
             'A', 'K', 'k', 'w' => y -%= 1,
             ' ' => {
                 if (game.move(@as(u6, y) * 8 + x)) |newgame| {
+                    seq[@popCount(u64, game.board[0] | game.board[1])] = @as(u6, y) * 8 + x;
                     game = newgame;
                     z ^= 1;
                 } else continue;
@@ -59,6 +64,11 @@ pub fn main() anyerror!void {
         0 => try stdout.writeAll("Draw"),
         -32...-1 => try stdout.writeAll("X wins"),
         else => unreachable,
+    }
+
+    const writer = stdout.writer();
+    for (seq) |i| {
+        try writer.print("\t{}", .{i});
     }
 }
 
