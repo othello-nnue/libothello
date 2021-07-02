@@ -43,6 +43,17 @@ test "init test" {
     try expect(j == 0x0000_1020_0408_0000);
 }
 
+test "size test" {
+    try expect(@sizeOf(othello.Game) == 16);
+}
+
+// https://github.com/ziglang/zig/issues/3696
+test "assign test" {
+    var g = othello.Game{};
+    g = g.pass();
+    try expect(g.board[0] != g.board[1]);
+}
+
 test "perft test" {
     inline for (known_perft) |known, i|
         try expect(perft(.{}, i) == known);
