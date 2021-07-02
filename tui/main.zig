@@ -30,11 +30,12 @@ pub fn main() anyerror!void {
             z ^= 1;
         }
         if (z == 1) {
-            game = game.move(engine.simple(game, engine.evals.mobility)).?;
+            game = game.move(engine.absearch(game, engine.evals.mobility, 8)).?;
             z ^= 1;
-            try render();
+
             continue;
         }
+        try render();
         _ = try stdin.read(&buff);
         switch (buff[0]) {
             'q' => return,
@@ -50,7 +51,6 @@ pub fn main() anyerror!void {
             },
             else => continue,
         }
-        try render();
     }
     var u = game.score();
     if (z == 1) u = -u;

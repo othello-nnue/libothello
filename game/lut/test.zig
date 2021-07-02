@@ -449,11 +449,20 @@ pub const known = [0x3800]u8{
     32, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 };
 
+const expect = @import("std").testing.expect;
+
 test "result test" {
-    const expect = @import("std").testing.expect;
     const res = @import("./result.zig").result();
     var i: u64 = 0;
     while (i < 0x3800) : (i += 1) {
         try expect(known[i] == res[i]);
     }
+}
+
+test "range test" {
+    const MASK = @import("./mask.zig").MASK;
+    for (MASK) |i|
+        for (i) |j|
+            for (j) |k|
+                try expect(@popCount(u64, k) <= 6);
 }

@@ -1,9 +1,7 @@
-const std = @import("std");
 const othello = @import("othello");
-const bench = @import("bench");
 const expect = @import("std").testing.expect;
 
-fn perft(board: othello.Game, depth: usize) u64 {
+pub fn perft(board: othello.Game, depth: usize) u64 {
     if (depth == 0) return 1;
     var moves = board.moves();
     if (moves == 0)
@@ -69,13 +67,3 @@ const known_perft = .{
     212258800,
     1939886636,
 };
-
-pub fn main() anyerror!void {
-    try bench.benchmark(struct {
-        pub const args = [_]usize{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-        pub const min_iterations = 1;
-        pub fn perf(depth: usize) u64 {
-            return perft(.{}, depth);
-        }
-    });
-}

@@ -14,3 +14,9 @@ Therefore, for now it relies mainly on LLVM's auto vectorization.
 # Move resolution
 
 Move resolution is implemented using PDEP/PEXT bitboard with 18.5KiB of LUT which would fit in the L1D cache. 
+
+Name | Type | Size
+----:|----:|----:
+`index`|`[64][4]u16`|0.5KiB
+`mask`|`[64][4][2]u64`|4KiB
+`result`|`[0x3800]u8`|14KiB
