@@ -1,3 +1,5 @@
+// https://github.com/ziglang/zig/issues/2291
+
 extern fn @"llvm.x86.bmi.pdep.64"(u64, u64) u64;
 extern fn @"llvm.x86.bmi.pext.64"(u64, u64) u64;
 

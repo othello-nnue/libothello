@@ -43,9 +43,6 @@ pub fn move(board: [2]u64, place: u6) u64 {
         ret |= pdep(RESULT[
             @as(u64, INDEX[place][i]) * 32 + pext(board[0], MASK[place][i][0]) * 64 + pext(board[1], MASK[place][i][1])
         ], MASK[place][i][1]);
-    assert(ret & board[1] == ret);
-    assert(ret & board[0] == 0);
-    assert(ret & (@as(u64, 1) << place) == 0);
     return ret;
 }
 
