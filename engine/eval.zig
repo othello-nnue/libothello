@@ -6,6 +6,7 @@ pub fn zero(game: othello.Game) i64 {
 }
 
 //pub fn random
+//pub fn hash
 
 pub fn mobility(game: othello.Game) i64 {
     return @popCount(u64, game.moves());

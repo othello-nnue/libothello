@@ -2,22 +2,6 @@ const math = @import("std").math;
 const othello = @import("othello");
 pub const evals = @import("./eval.zig");
 
-pub fn simple(game: othello.Game, comptime eval: fn (othello.Game) i64) u6 {
-    var moves = game.moves();
-    var ret: u6 = 0;
-    var min: i64 = 64; //should change
-    while (moves != 0) {
-        const i = @intCast(u6, @ctz(u64, moves));
-        moves &= moves - 1;
-        const j = eval(game.move(i).?);
-        if (j < min) {
-            min = j;
-            ret = i;
-        }
-    }
-    return ret;
-}
-
 //alphabeta without tt
 fn ab(game: othello.Game, comptime eval: fn (othello.Game) i64, alpha: i64, beta: i64, depth: u8) i64 {
     if (depth == 0) return eval(game);
@@ -58,7 +42,7 @@ pub fn absearch(game: othello.Game, comptime eval: fn (othello.Game) i64, depth:
 }
 
 const Searcher = struct {
-    history = [_]u16{0} ** (64 * 64),
+    history: u16[64][64],
     pub fn search() void {}
 };
 

@@ -1,0 +1,1 @@
+const othello = @import("othello");
