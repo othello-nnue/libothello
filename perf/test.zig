@@ -1,7 +1,7 @@
-const othello = @import("othello");
+const Game = @import("othello");
 const expect = @import("std").testing.expect;
 
-pub fn perft(board: othello.Game, depth: usize) u64 {
+pub fn perft(board: Game, depth: usize) u64 {
     if (depth == 0) return 1;
     var moves = board.moves();
     if (moves == 0)
@@ -17,7 +17,7 @@ pub fn perft(board: othello.Game, depth: usize) u64 {
     return sum;
 }
 
-fn check(board: othello.Game, depth: usize) bool {
+fn check(board: Game, depth: usize) bool {
     if (depth == 0) return false;
     var moves = board.moves();
 
@@ -38,18 +38,18 @@ fn check(board: othello.Game, depth: usize) bool {
 }
 
 test "init test" {
-    const i = othello.init();
-    const j = othello.moves(i);
+    const i = Game{};
+    const j = i.moves();
     try expect(j == 0x0000_1020_0408_0000);
 }
 
 test "size test" {
-    try expect(@sizeOf(othello.Game) == 16);
+    try expect(@sizeOf(Game) == 16);
 }
 
 // https://github.com/ziglang/zig/issues/3696
 test "assign test" {
-    var g = othello.Game{};
+    var g = Game{};
     g = g.pass();
     try expect(g.board[0] != g.board[1]);
 }

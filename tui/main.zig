@@ -1,5 +1,5 @@
 const std = @import("std");
-const othello = @import("othello");
+const Game = @import("othello");
 const engine = @import("engine");
 
 const os = std.os;
@@ -15,7 +15,7 @@ var z: u1 = 0;
 
 var seq = [_]u8{255} ** 64;
 
-var game = othello.Game{};
+var game = Game{};
 
 pub fn main() anyerror!void {
     const original_termios = try rawmode();
@@ -31,12 +31,20 @@ pub fn main() anyerror!void {
             game = game.pass();
             z ^= 1;
         }
-        if (z == 1) {
-            const move = engine.absearch(game, engine.evals.mobility, 8);
+        if (z == 0) {
+            const move = engine.absearch(game, engine.evals.mobility, 10);
             seq[@popCount(u64, game.board[0] | game.board[1])] = move;
             game = game.move(move).?;
             z ^= 1;
-
+            try render();
+            continue;
+        }
+        if (z == 1) {
+            const move = engine.absearch(game, engine.evals.good, 10);
+            seq[@popCount(u64, game.board[0] | game.board[1])] = move;
+            game = game.move(move).?;
+            z ^= 1;
+            try render();
             continue;
         }
         try render();

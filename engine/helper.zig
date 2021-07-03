@@ -1,1 +1,1 @@
-const othello = @import("othello");
+const Game = @import("othello");

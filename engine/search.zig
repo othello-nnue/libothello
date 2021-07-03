@@ -1,9 +1,9 @@
 const math = @import("std").math;
-const othello = @import("othello");
+const Game = @import("othello");
 pub const evals = @import("./eval.zig");
 
 //alphabeta without tt
-fn ab(game: othello.Game, comptime eval: fn (othello.Game) i64, alpha: i64, beta: i64, depth: u8) i64 {
+fn ab(game: Game, comptime eval: fn (Game) i64, alpha: i64, beta: i64, depth: u8) i64 {
     if (depth == 0) return eval(game);
     var moves = game.moves();
     if (moves == 0) return ~ab(game.pass(), eval, ~beta, ~alpha, depth - 1);
@@ -21,7 +21,7 @@ fn ab(game: othello.Game, comptime eval: fn (othello.Game) i64, alpha: i64, beta
     return max;
 }
 
-pub fn absearch(game: othello.Game, comptime eval: fn (othello.Game) i64, depth: u8) u6 {
+pub fn absearch(game: Game, comptime eval: fn (Game) i64, depth: u8) u6 {
     if (depth == 0) return 0;
     var moves = game.moves();
     if (moves == 0) return 0;
@@ -41,6 +41,8 @@ pub fn absearch(game: othello.Game, comptime eval: fn (othello.Game) i64, depth:
     return ret;
 }
 
+//todo : iterative deepening
+
 const Searcher = struct {
     history: u16[64][64],
     pub fn search() void {}
@@ -48,7 +50,7 @@ const Searcher = struct {
 
 //countermove history
 
-//pub fn minimax(game: othello.Game, comptime eval: fn (othello.Game) i64, depth : u64) i64 {
+//pub fn minimax(game: Game, comptime eval: fn (Game) i64, depth : u64) i64 {
 //minimax with memory
 //mtdf with memory
 //etc
