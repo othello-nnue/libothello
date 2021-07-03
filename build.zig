@@ -16,7 +16,7 @@ pub fn build(b: *std.build.Builder) void {
     };
     const engine = Pkg{
         .name = "engine",
-        .path = F{ .path = "engine/search.zig" },
+        .path = F{ .path = "engine/main.zig" },
         .dependencies = &.{othello},
     };
     {
