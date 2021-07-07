@@ -20,6 +20,12 @@ pub fn build(b: *std.build.Builder) void {
         .dependencies = &.{othello},
     };
     {
+        const lib = b.addStaticLibrary("othello", "game/ffi.zig");
+        lib.setTarget(target);
+        lib.setBuildMode(mode);
+        lib.install();
+    }
+    {
         const exe = b.addExecutable("tui", "tui/main.zig");
         exe.setTarget(target);
         exe.setBuildMode(mode);

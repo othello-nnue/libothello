@@ -3,8 +3,8 @@ const Game = @import("othello");
 const eval = @import("./eval.zig");
 const Self = @This();
 
-depth : u8,
-comptime eval : fn (Game) i64 = eval.good,
+depth: u8,
+comptime eval: fn (Game) i64 = eval.good,
 
 //alphabeta without tt
 fn ab(game: Game, comptime ev: fn (Game) i64, alpha: i64, beta: i64, depth: u8) i64 {
@@ -25,7 +25,7 @@ fn ab(game: Game, comptime ev: fn (Game) i64, alpha: i64, beta: i64, depth: u8) 
     return max;
 }
 
-pub fn move(self:Self, game: Game) u6 {
+pub fn move(self: Self, game: Game) u6 {
     var moves = game.moves();
     if (moves == 0) return 0;
     var alpha: i64 = math.minInt(i64);

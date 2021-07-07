@@ -16,7 +16,7 @@ var z: u1 = 0;
 var seq = [_]u8{255} ** 64;
 
 var game = Game{};
-const eng = engine.ab{.depth = 8, .eval = engine.evals.good};
+const eng = engine.ab{ .depth = 8, .eval = engine.evals.good };
 
 pub fn main() anyerror!void {
     const original_termios = try rawmode();
