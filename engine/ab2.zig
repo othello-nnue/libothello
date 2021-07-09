@@ -6,7 +6,7 @@ const eval = @import("./eval.zig");
 const Self = @This();
 
 depth: u8,
-comptime eval: fn (Game) i64 = eval.good,
+comptime eval: fn (Game) i64 = eval.mobility,
 
 //alphabeta without tt
 fn ab(game: Game, comptime ev: fn (Game) i64, alpha: i64, beta: i64, depth: u8) i64 {
