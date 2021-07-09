@@ -26,6 +26,13 @@ pub fn build(b: *std.build.Builder) void {
         lib.install();
     }
     {
+        const ver = b.version(0, 0, 0);
+        const lib = b.addSharedLibrary("othello", "game/ffi.zig", ver);
+        lib.setTarget(target);
+        lib.setBuildMode(mode);
+        lib.install();
+    }
+    {
         const exe = b.addExecutable("tui", "tui/main.zig");
         exe.setTarget(target);
         exe.setBuildMode(mode);
@@ -40,6 +47,23 @@ pub fn build(b: *std.build.Builder) void {
         }
 
         const run_step = b.step("run", "Run the app");
+        run_step.dependOn(&run_cmd.step);
+    }
+    {
+        const exe = b.addExecutable("elo", "perf/elo.zig");
+        exe.setTarget(target);
+        exe.setBuildMode(mode);
+        exe.addPackage(othello);
+        exe.addPackage(engine);
+        exe.install();
+
+        const run_cmd = exe.run();
+        run_cmd.step.dependOn(b.getInstallStep());
+        if (b.args) |args| {
+            run_cmd.addArgs(args);
+        }
+
+        const run_step = b.step("elo", "Run regression tests");
         run_step.dependOn(&run_cmd.step);
     }
     {
