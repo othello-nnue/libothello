@@ -1,6 +1,9 @@
 pub const evals = @import("./eval.zig");
 pub const ab = @import("./ab.zig");
 pub const ab2 = @import("./ab2.zig");
+pub const ab3 = @import("./ab3.zig");
+pub const abtt = @import("./abtt.zig");
+pub const mtdf = @import("./mtdf.zig");
 
 //todo : iterative deepening
 

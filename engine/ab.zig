@@ -9,19 +9,17 @@ depth: u8,
 comptime eval: fn (Game) i64 = eval.good,
 
 //alphabeta without tt
-fn ab(game: Game, comptime ev: fn (Game) i64, alpha: i64, beta: i64, depth: u8) i64 {
+pub fn ab(game: Game, comptime ev: fn (Game) i64, alpha: i64, beta: i64, depth: u8) i64 {
     if (depth == 0) return ev(game);
     var moves = game.moves();
     if (moves == 0) return ~ab(game.pass(), ev, ~beta, ~alpha, depth - 1);
-    var a = alpha;
 
     var max: i64 = math.minInt(i64); //should change
     while (moves != 0) {
         const i = @intCast(u6, @ctz(u64, moves));
         moves &= moves - 1;
-        const j = ~ab(game.move(i).?, ev, ~beta, ~a, depth - 1);
+        const j = ~ab(game.move(i).?, ev, ~beta, ~math.max(alpha, max), depth - 1);
         if (j > max) max = j;
-        if (j > a) a = j;
         if (j >= beta) break;
     }
     return max;

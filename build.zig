@@ -67,6 +67,23 @@ pub fn build(b: *std.build.Builder) void {
         run_step.dependOn(&run_cmd.step);
     }
     {
+        const exe = b.addExecutable("stability", "perf/stability.zig");
+        exe.setTarget(target);
+        exe.setBuildMode(mode);
+        exe.addPackage(othello);
+        exe.addPackage(engine);
+        exe.install();
+
+        const run_cmd = exe.run();
+        run_cmd.step.dependOn(b.getInstallStep());
+        if (b.args) |args| {
+            run_cmd.addArgs(args);
+        }
+
+        const run_step = b.step("stability", "Run stability tests");
+        run_step.dependOn(&run_cmd.step);
+    }
+    {
         const exe = b.addExecutable("perf", "perf/bench.zig");
         exe.setTarget(target);
         exe.setBuildMode(std.builtin.Mode.ReleaseFast);
