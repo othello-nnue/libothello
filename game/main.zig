@@ -101,20 +101,19 @@ fn filled(a: u64, comptime dir: u6) u64 {
         8 => 0xFF00_0000_0000_00FF,
         1 => 0x8181_8181_8181_8181,
         7, 9 => 0xFF81_8181_8181_81FF,
+        else => unreachable,
     } | ~b;
 }
 
-pub fn stable(a: u64, b: u64) u64 {
-    var stable = 0;
+export fn stable(a: u64, b: u64) u64 {
+    var ret: u64 = 0;
     var fil = a | b;
-    comptime var i = 0;
     while (true) {
-        var b = a;
+        var c = a;
         inline for (.{ 1, 7, 8, 9 }) |i|
-            b &= stable >> i | stable << i | filled(fil, i);
-        if (stable == b)
-            return stable;
-        stable = b;
+            c &= ret >> i | ret << i | filled(fil, i);
+        if (ret == c)
+            return ret;
+        ret = c;
     }
-}
-//not all actually
+} //not all actually
