@@ -77,3 +77,44 @@ pub fn movenum(self: Self) u6 {
     assert(self.board[0] & self.board[1] == 0);
     return @popCount(u64, self.board[0] | self.board[1]);
 }
+
+fn filled(a: u64, comptime dir: u6) u64 {
+    var b = ~a;
+    comptime var x = switch (@mod(dir, 8)) {
+        0 => 0xFFFF_FFFF_FFFF_FFFF,
+        1 => 0xFEFE_FEFE_FEFE_FEFE,
+        7 => 0x7F7F_7F7F_7F7F_7F7F,
+        else => unreachable,
+    };
+    comptime var y = switch (@mod(dir, 8)) {
+        0 => 0xFFFF_FFFF_FFFF_FFFF,
+        1 => 0x7F7F_7F7F_7F7F_7F7F,
+        7 => 0xFEFE_FEFE_FEFE_FEFE,
+        else => unreachable,
+    };
+    inline for (.{ dir, dir * 2, dir * 4 }) |d| {
+        b |= (b << d & x) | (b >> d & y);
+        x &= x << d;
+        y &= y >> d;
+    }
+    return comptime switch (dir) {
+        8 => 0xFF00_0000_0000_00FF,
+        1 => 0x8181_8181_8181_8181,
+        7, 9 => 0xFF81_8181_8181_81FF,
+    } | ~b;
+}
+
+pub fn stable(a: u64, b: u64) u64 {
+    var stable = 0;
+    var fil = a | b;
+    comptime var i = 0;
+    while (true) {
+        var b = a;
+        inline for (.{ 1, 7, 8, 9 }) |i|
+            b &= stable >> i | stable << i | filled(fil, i);
+        if (stable == b)
+            return stable;
+        stable = b;
+    }
+}
+//not all actually
