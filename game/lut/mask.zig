@@ -1,13 +1,10 @@
 const mul = @import("utils").mul;
 const fill = @import("utils").fill;
 
-const RIGHT: u64 = mul(0xFF, 0x7F);
-const LEFT: u64 = mul(0xFF, 0xFE);
-// todo : rewrite with fill
 fn mask(pos: u6, comptime dir: u6) [2]u64 {
     const t = @as(u64, 1) << pos;
     const a = t | t << 8 | t >> 8;
-    const b = a | (a << 1 & LEFT) | (a >> 1 & RIGHT);
+    const b = a | (a << 1 & mul(0xFF, 0xFE)) | (a >> 1 & mul(0xFF, 0x7F));
 
     const r = fill(t, dir);
     return .{ r & ~b, r & ~t & switch (dir) {

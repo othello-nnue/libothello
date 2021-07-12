@@ -1,5 +1,5 @@
 // https://github.com/ziglang/zig/issues/2291
-
+// https://github.com/ziglang/zig/issues/1717
 extern fn @"llvm.x86.bmi.pdep.64"(u64, u64) u64;
 extern fn @"llvm.x86.bmi.pext.64"(u64, u64) u64;
 
@@ -46,18 +46,6 @@ pub fn lut_type(comptime t: type) type {
     return x;
 }
 
-test "lut_type_test" {
-    std.debug.print("{}\n", .{lut_type(fn (u6, u6) u64)});
-}
-
-pub fn lut_builder(comptime func: anytype, args: anytype) lut_type(@TypeOf(func)) {
-    @setEvalBranchQuota(10000);
-    var ret: lut_type(@TypeOf(func)) = undefined;
-    for (ret) |*m, i|
-        m.* = func(@intCast(u6, i));
-    return ret;
-}
-
 pub fn fill(a: u64, comptime dir: u6) u64 {
     var b = a;
     comptime var x = switch (@mod(dir, 8)) {
@@ -80,9 +68,6 @@ pub fn fill(a: u64, comptime dir: u6) u64 {
     return b;
 }
 
-const RIGHT: u64 = mul(0xFF, 0x7F);
-const LEFT: u64 = mul(0xFF, 0xFE);
-
 fn fill2(pos: u6, dir: u2) u64 {
     const t = @as(u64, 1) << pos;
     var r =
@@ -96,8 +81,8 @@ fn fill2(pos: u6, dir: u2) u64 {
         r = switch (dir) {
             0 => r << 8,
             1 => r << 1,
-            2 => r >> 1 & RIGHT | r << 8,
-            3 => r << 1 & LEFT | r << 8,
+            2 => r >> 1 & mul(0xFF, 0x7F) | r << 8,
+            3 => r << 1 & mul(0xFF, 0xFE) | r << 8,
         };
     return r;
 }

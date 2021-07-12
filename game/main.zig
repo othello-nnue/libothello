@@ -2,7 +2,6 @@ const Self = @This();
 const assert = @import("std").debug.assert;
 const mul = @import("utils").mul;
 
-
 board: [2]u64 = .{ 0x0000_0008_1000_0000, 0x0000_0010_0800_0000 },
 
 fn fill(board: [2]u64, comptime dir: u6) u64 {
@@ -19,6 +18,7 @@ fn fill(board: [2]u64, comptime dir: u6) u64 {
     return x;
 }
 
+/// Returns the set of legal moves. 
 pub fn moves(self: Self) u64 {
     assert(self.board[0] & self.board[1] == 0);
     var ret: u64 = 0;
@@ -36,6 +36,7 @@ const MASK = @import("lut/mask.zig").MASK;
 const INDEX = @import("lut/index.zig").INDEX;
 const RESULT = @import("lut/test.zig").known;
 
+/// Returns the set of stones that would be flipped.  
 pub fn flip(self: Self, place: u6) u64 {
     assert(self.board[0] & self.board[1] == 0);
     var ret: u64 = 0;
@@ -48,6 +49,7 @@ pub fn flip(self: Self, place: u6) u64 {
 }
 
 // https://github.com/ziglang/zig/issues/3696
+/// Returns the state after move. 
 pub fn move(self: Self, place: u6) ?Self {
     assert(self.board[0] & self.board[1] == 0);
     if (@as(u64, 1) << place & (self.board[0] | self.board[1]) != 0) return null;
@@ -58,63 +60,48 @@ pub fn move(self: Self, place: u6) ?Self {
 }
 
 // https://github.com/ziglang/zig/issues/3696
+/// Returns the state after pass. 
 pub fn pass(self: Self) Self {
     assert(self.board[0] & self.board[1] == 0);
     const temp = Self{ .board = .{ self.board[1], self.board[0] } };
     return temp;
 }
 
+/// Returns if the game ended. 
+/// Whether neither player can move.
 pub fn end(self: Self) bool {
     assert(self.board[0] & self.board[1] == 0);
     return self.moves() == 0 and self.pass().moves() == 0;
 }
 
 // actually i7 is enough
+/// Returns final score. 
 pub fn score(self: Self) i8 {
     assert(self.board[0] & self.board[1] == 0);
     return @as(i8, @popCount(u64, self.board[0])) - 32;
 }
 
+/// Returns move number. 
 pub fn movenum(self: Self) u6 {
     assert(self.board[0] & self.board[1] == 0);
     return @popCount(u64, self.board[0] | self.board[1]);
 }
 
-fn filled(a: u64, comptime dir: u6) u64 {
-    var b = ~a;
-    comptime var x = switch (@mod(dir, 8)) {
-        0 => 0xFFFF_FFFF_FFFF_FFFF,
-        1 => 0xFEFE_FEFE_FEFE_FEFE,
-        7 => 0x7F7F_7F7F_7F7F_7F7F,
-        else => unreachable,
-    };
-    comptime var y = switch (@mod(dir, 8)) {
-        0 => 0xFFFF_FFFF_FFFF_FFFF,
-        1 => 0x7F7F_7F7F_7F7F_7F7F,
-        7 => 0xFEFE_FEFE_FEFE_FEFE,
-        else => unreachable,
-    };
-    inline for (.{ dir, dir * 2, dir * 4 }) |d| {
-        b |= (b << d & x) | (b >> d & y);
-        x &= x << d;
-        y &= y >> d;
-    }
-    return comptime switch (dir) {
-        8 => 0xFF00_0000_0000_00FF,
-        1 => 0x8181_8181_8181_8181,
-        7, 9 => 0xFF81_8181_8181_81FF,
-        else => unreachable,
-    } | ~b;
-}
+const filled = @import("utils").fill;
 
-//not all
-export fn stable(a: u64, b: u64) u64 {
+/// Returns (subset of) unflippable stones.
+pub fn stable(a: u64, b: u64) u64 {
     var ret: u64 = 0;
-    var fil = a | b;
+    var fil = ~(a | b);
     while (true) {
         var c = a;
         inline for (.{ 1, 7, 8, 9 }) |i|
-            c &= ret >> i | ret << i | filled(fil, i);
+            c &= ~comptime switch (dir) {
+                1 => mul(0xFF, 0x7E),
+                8 => mul(0x7E, 0xFF),
+                7, 9 => mul(0x7E, 0x7E),
+                else => unreachable,
+            } | ~filled(fil, i) | ret >> i | ret << i;
         if (ret == c)
             return ret;
         ret = c;
