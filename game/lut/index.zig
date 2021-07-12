@@ -12,9 +12,4 @@ fn index(pos: u6) [4]u16 {
     };
 }
 
-pub const INDEX: [64][4]u16 = init: {
-    var ret: [64][4]u16 = undefined;
-    for (ret) |*m, i|
-        m.* = index(@intCast(u6, i));
-    break :init ret;
-};
+pub const INDEX = @import("utils").make_array([4]u16, index);
