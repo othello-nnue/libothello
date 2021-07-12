@@ -6,9 +6,14 @@ pub fn build(b: *std.build.Builder) void {
     const target = b.standardTargetOptions(.{});
     const mode = b.standardReleaseOptions();
 
+    const utils = Pkg{
+        .name = "utils",
+        .path = F{ .path = "game/utils.zig" },
+    };
     const othello = Pkg{
         .name = "othello",
         .path = F{ .path = "game/main.zig" },
+        .dependencies = &.{utils},
     };
     const bench = Pkg{
         .name = "bench",
@@ -23,6 +28,7 @@ pub fn build(b: *std.build.Builder) void {
         const lib = b.addStaticLibrary("othello", "game/ffi.zig");
         lib.setTarget(target);
         lib.setBuildMode(mode);
+        lib.addPackage(othello);
         lib.install();
     }
     {
@@ -30,6 +36,7 @@ pub fn build(b: *std.build.Builder) void {
         const lib = b.addSharedLibrary("othello", "game/ffi.zig", ver);
         lib.setTarget(target);
         lib.setBuildMode(mode);
+        lib.addPackage(othello);
         lib.install();
     }
     {

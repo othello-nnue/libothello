@@ -1,5 +1,5 @@
-const pdep = @import("../intrinsic.zig").pdep;
-const pext = @import("../intrinsic.zig").pext;
+const pdep = @import("utils").pdep;
+const pext = @import("utils").pext;
 
 fn res(i: u3, p: u8, n: u8) u8 {
     if (p & n != 0)
