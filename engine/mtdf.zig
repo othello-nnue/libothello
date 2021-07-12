@@ -7,11 +7,11 @@ const Self = @This();
 
 const Value = i8;
 
-const Entry = struct { move: u6, depth: u8, ub: Value, lb: Value };
+const Entry = struct { hash: u64, move: u6, depth: u8, ub: Value, lb: Value };
 const Result = struct { value: Value, move: u6 };
 
 depth: u8,
-pvmove: [0x10000]Entry = [1]Entry{Entry{ .move = 0, .depth = 0, .ub = 0, .lb = 0 }} ** 0x10000,
+pvmove: [0x10000]Entry = [1]Entry{Entry{ .hash = 0, .move = 0, .depth = 0, .ub = 0, .lb = 0 }} ** 0x10000,
 comptime eval: fn (Game) Value = eval.goods,
 
 fn hash2(game: Game) u64 {
@@ -42,7 +42,7 @@ fn ab(self: *Self, game: Game, alpha: Value, beta: Value, depth: u8) Result {
     if (moves == 0) return .{ .value = ~self.ab(game.pass(), ~b, ~a, depth - 1).value, .move = 0 };
 
     var pv = entry.move;
-    const positive = (moves & (@as(u64, 1) << entry.move) != 0);
+    const positive = (moves & (@as(u64, 1) << entry.move) != 0) and (hashed == entry.hash);
 
     if (positive and entry.depth == depth) {
         if (entry.lb >= beta) return .{ .value = entry.lb, .move = entry.move };
@@ -52,7 +52,7 @@ fn ab(self: *Self, game: Game, alpha: Value, beta: Value, depth: u8) Result {
     }
 
     var max: Value = math.minInt(Value);
-    if (depth > 5) {
+    if (depth > 5 or positive) {
         if (!positive) pv = self.ab(game, alpha, beta, 3).move;
         moves ^= (@as(u64, 1) << pv);
         max = ~self.ab(game.move(pv).?, ~beta, ~alpha, depth - 1).value;
@@ -67,7 +67,7 @@ fn ab(self: *Self, game: Game, alpha: Value, beta: Value, depth: u8) Result {
             pv = i;
         }
     }
-    if (depth >= self.pvmove[@truncate(u16, hashed)].depth) {
+    if (depth >= entry.depth) {
         var lb: Value = math.minInt(Value);
         var ub: Value = math.maxInt(Value);
         if (positive) {
@@ -86,7 +86,7 @@ fn ab(self: *Self, game: Game, alpha: Value, beta: Value, depth: u8) Result {
             .depth = depth,
             .lb = lb,
             .ub = ub,
-            //.hash = @truncate(u8, hashed >> 16),
+            .hash = hashed,
             .move = pv,
         };
     }
