@@ -89,8 +89,7 @@ pub fn movenum(self: Self) u6 {
 
 const filled = @import("utils").fill;
 
-/// Returns (subset of) unflippable stones.
-pub fn stable(a: u64, b: u64) u64 {
+fn unflippable(a: u64, b: u64) u64 {
     var ret: u64 = 0;
     var fil = ~(a | b);
     while (true) {
@@ -106,4 +105,9 @@ pub fn stable(a: u64, b: u64) u64 {
             return ret;
         ret = c;
     }
+}
+
+/// Returns (subset of) unflippable stones.
+pub fn stable(self: Self) u64 {
+    return unflippable(self.board[0], self.board[1]) | unflippable(self.board[1], self.board[0]);
 }

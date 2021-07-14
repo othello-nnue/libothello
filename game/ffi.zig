@@ -9,3 +9,8 @@ export fn moves(a: u64, b: u64) u64 {
     const x = game{ .board = .{ a, b } };
     return x.moves();
 }
+
+export fn stable(a: u64, b: u64) u64 {
+    const x = game{ .board = .{ a, b } };
+    return x.stable();
+}
