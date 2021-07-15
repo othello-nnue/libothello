@@ -19,27 +19,27 @@ for epoch in 1:100
     while Othello.moves(a,b) != 0 || Othello.moves(b,a) != 0
         if Othello.moves(a,b) == 0
             (a,b) = (b,a)
-        moves = Othello.moves(a,b)
+        end
 
         pair = []
+        moves = Othello.moves(a,b)
         while moves != 0
             x = UInt8(Bits.scan1(moves) - 1)
-            
-            t = Othello.flip(a,b, x)
-            out = output(b\u22bb t, a \u22bb t \u22bb (moves & -moves))
+            t = Othello.flip(a, b, x)
+            out = output(xor(b, t), xor(a, t, moves & -moves))
             moves &= moves - 1
-
             append!(pair, [(x, out)])
-
-        input = vcat(Bits.bits(a), Bits.bits(b))
-        maxmove = findmax(pair)
-        move = 0
-        flip = Othello.flip(a, b, move)
-        (a,b) = (b \u22bb flip, a \u22bb flip)
+        end
         
-        append!(x_train, [input])
-        append!(y_train, [output])
-    data = [(x_train, y_train)]    
+        maxmove = findmax((x->sum(x[2])).(pair))[2]
+        move = pair[maxmove][1]
+        flip = Othello.flip(a, b, move)
+        (a,b) = (xor(b, flip), xor(a, flip))
+        
+        append!(x_train, [vcat(Bits.bits(a), Bits.bits(b))])
+        append!(y_train, [pair[maxmove][2]])
+    end
+    print("YAY")
 end
 
 loss(x, y) = Flux.Losses.mse(model(x), y)
