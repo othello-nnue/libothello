@@ -35,7 +35,7 @@ pub fn build(b: *std.build.Builder) void {
         const ver = b.version(0, 0, 0);
         const lib = b.addSharedLibrary("othello", "game/ffi.zig", ver);
         lib.setTarget(target);
-        lib.setBuildMode(mode);
+        lib.setBuildMode(std.builtin.Mode.ReleaseFast);
         lib.addPackage(othello);
         lib.install();
     }
