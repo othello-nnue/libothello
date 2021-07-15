@@ -30,18 +30,18 @@ for epoch in 1:100
             moves &= moves - 1
             append!(pair, [(x, out)])
         end
-        
+
         maxmove = findmax((x->sum(x[2])).(pair))[2]
         move = pair[maxmove][1]
         flip = Othello.flip(a, b, move)
-        (a,b) = (xor(b, flip), xor(a, flip))
-        
         append!(x_train, [vcat(Bits.bits(a), Bits.bits(b))])
         append!(y_train, [pair[maxmove][2]])
-    end
-    print("YAY")
-end
 
+        (a,b) = (xor(b, flip), xor(a, flip, UInt64(1) << move))
+        print(a, ", ",  b, "\n")
+    end
+    # do something...
+end
 loss(x, y) = Flux.Losses.mse(model(x), y)
 opt = Flux.Descent()
 

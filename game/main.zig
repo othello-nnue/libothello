@@ -95,7 +95,7 @@ fn unflippable(a: u64, b: u64) u64 {
     while (true) {
         var c = a;
         inline for (.{ 1, 7, 8, 9 }) |i|
-            c &= ~comptime switch (dir) {
+            c &= ~switch (i) {
                 1 => mul(0xFF, 0x7E),
                 8 => mul(0x7E, 0xFF),
                 7, 9 => mul(0x7E, 0x7E),
