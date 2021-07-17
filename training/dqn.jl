@@ -7,13 +7,12 @@ function output(a::UInt64, b::UInt64)
 end
 
 model = Flux.Chain(Dense(128, 256, relu), Dense(256, 256, relu), Dense(256, 64, tanh))
-param = params(model)
-epsilon = 0.001
+epsilon = 0.3
 
 x_train = []
 y_train = []
 
-for epoch in 1:100000
+while true
     global x_train, y_train
 
     a = 0x0000_0008_1000_0000
@@ -30,7 +29,7 @@ for epoch in 1:100000
             t = Othello.flip(a, b, x)
             out = output(xor(b, t), xor(a, t, moves & -moves))
             moves &= moves - 1
-            append!(pair, [(x, out)])
+            append!(pair, [(x, -out)])
         end
 
         maxmove = findmax((x->sum(x[2])).(pair))[2]
@@ -47,19 +46,25 @@ for epoch in 1:100000
 
         (a,b) = (xor(b, flip), xor(a, flip, UInt64(1) << move))
     end
-    append!(x_train, [vcat(Bits.bits(a), Bits.bits(b))])
-    append!(y_train, [(x-> 2*x - 1).(Bits.bits(a))])
+    push!(x_train, vcat(Bits.bits(a), Bits.bits(b)))
+    push!(y_train, (x-> 2*x - 1).(Bits.bits(a)))
 
     print("YAY\n", length(x_train), length(y_train), "\n")
     sleep(0.1)
     if length(x_train) > 2048
-        print("PLEASE IMPELEMENT TRAINING")
+        #print("PLEASE IMPELEMENT TRAINING")
+
+        loss(x, y) = Flux.Losses.mse(model(x), y)
+        parameters = params(model)
+        data = [(hcat(x_train...), hcat(y_train...))]
+        opt = Flux.Descent()
+        
+        for epoch in 1:1
+            Flux.train!(loss, parameters, data, opt)
+        end
         x_train = []
         y_train = []
-        break
     end
 end
-loss(x, y) = Flux.Losses.mse(model(x), y)
-opt = Flux.Descent()
 
 
