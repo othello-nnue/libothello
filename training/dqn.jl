@@ -53,7 +53,7 @@ while true
     sleep(0.1)
     if length(x_train) > 2048
         #print("PLEASE IMPELEMENT TRAINING")
-
+        model |> gpu
         loss(x, y) = Flux.Losses.mse(model(x), y)
         parameters = params(model)
         data = [(hcat(x_train...), hcat(y_train...))]
@@ -62,9 +62,8 @@ while true
         for epoch in 1:1
             Flux.train!(loss, parameters, data, opt)
         end
+        model |> cpu
         x_train = []
         y_train = []
     end
 end
-
-
