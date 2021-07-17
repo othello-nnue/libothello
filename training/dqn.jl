@@ -50,9 +50,7 @@ while true
     push!(y_train, (x-> 2*x - 1).(Bits.bits(a)))
 
     print("YAY\n", length(x_train), length(y_train), "\n")
-    sleep(0.1)
     if length(x_train) > 2048
-        #print("PLEASE IMPELEMENT TRAINING")
         model |> gpu
         loss(x, y) = Flux.Losses.mse(model(x), y)
         parameters = params(model)
