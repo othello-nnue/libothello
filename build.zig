@@ -103,13 +103,25 @@ pub fn build(b: *std.build.Builder) void {
         const run_step = b.step("bench", "Run benchmark tests");
         run_step.dependOn(&run_cmd.step);
     }
+    const test_step = b.step("test", "Run library tests");
+    {
+        var tests = b.addTest("game/utils.zig");
+        tests.setTarget(target);
+        tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
+        test_step.dependOn(&tests.step);
+    }
+    {
+        var tests = b.addTest("game/lut/test.zig");
+        tests.setTarget(target);
+        tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
+        tests.addPackage(utils);
+        test_step.dependOn(&tests.step);
+    }
     {
         var tests = b.addTest("perf/test.zig");
         tests.setTarget(target);
         tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
         tests.addPackage(othello);
-
-        const test_step = b.step("test", "Run library tests");
         test_step.dependOn(&tests.step);
     }
 }

@@ -385,14 +385,11 @@ pub const known = [0x3000]u8{
     32, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 };
 
-const expect = @import("std").testing.expect;
+const testing = @import("std").testing;
 
 test "result test" {
     const res = @import("./result.zig").result();
-    var i: u64 = 0;
-    while (i < 0x3000) : (i += 1) {
-        try expect(known[i] == res[i]);
-    }
+    try testing.expectEqualSlices(u8, &res, &known);
 }
 
 test "range test" {
@@ -400,5 +397,5 @@ test "range test" {
     for (MASK) |i|
         for (i) |j|
             for (j) |k|
-                try expect(@popCount(u64, k) <= 6);
+                try testing.expect(@popCount(u64, k) <= 6);
 }
