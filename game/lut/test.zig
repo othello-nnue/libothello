@@ -390,7 +390,7 @@ const expect = @import("std").testing.expect;
 test "result test" {
     const res = @import("./result.zig").result();
     var i: u64 = 0;
-    while (i < 0x3800) : (i += 1) {
+    while (i < 0x3000) : (i += 1) {
         try expect(known[i] == res[i]);
     }
 }
