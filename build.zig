@@ -57,6 +57,22 @@ pub fn build(b: *std.build.Builder) void {
         run_step.dependOn(&run_cmd.step);
     }
     {
+        const exe = b.addExecutable("gen", "game/lut/gen.zig");
+        exe.setTarget(target);
+        exe.setBuildMode(mode);
+        exe.addPackage(utils);
+        exe.install();
+
+        const run_cmd = exe.run();
+        run_cmd.step.dependOn(b.getInstallStep());
+        if (b.args) |args| {
+            run_cmd.addArgs(args);
+        }
+
+        const run_step = b.step("gen", "Generate the table");
+        run_step.dependOn(&run_cmd.step);
+    }
+    {
         const exe = b.addExecutable("elo", "perf/elo.zig");
         exe.setTarget(target);
         exe.setBuildMode(mode);
@@ -106,7 +122,8 @@ pub fn build(b: *std.build.Builder) void {
     {
         var tests = b.addTest("perf/test.zig");
         tests.setTarget(target);
-        tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
+        //tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
+        tests.setBuildMode(mode);
         tests.addPackage(othello);
 
         const test_step = b.step("test", "Run library tests");
