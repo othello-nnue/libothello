@@ -4,19 +4,14 @@ This is [Zig](ziglang.org) port of [Othello move generator](https://gitlab.com/r
 
 # Move generation
 
-Move generation is implemented with the Kogge-Stone Algorithm, intended to compile to SIMD operations. Though theoretically it can be further optimized using AVX512 bit rotation instructions, it is not done for following reasons. 
-
-1. AVX512 instructions cause significant frequency throttling, resulting in a performance degradation in mixed workload. 
-2. [Zig](ziglang.org)'s SIMD is not documented well currently. 
-
-Therefore, for now it relies mainly on LLVM's auto vectorization. 
+The move generation part implements the [Kogge-Stone Algorithm](https://www.chessprogramming.org/Kogge-Stone_Algorithm), intended to compile to SIMD instructions. 
 
 # Move resolution
 
-Move resolution is implemented using PDEP/PEXT bitboard with 18.5KiB of LUT which would fit in the L1D cache. 
+The move resolution part uses PDEP/PEXT instructions and 16.5KiB of LUT, which would fit in the L1D cache. 
 
 Name | Type | Size
 ----:|----:|----:
 `index`|`[64][4]u16`|0.5KiB
 `mask`|`[64][4][2]u64`|4KiB
-`result`|`[0x3800]u8`|14KiB
+`result`|`[0x3000]u8`|12KiB
