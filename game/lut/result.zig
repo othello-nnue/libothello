@@ -23,8 +23,8 @@ fn res(i: u3, p: u8, n: u8) u8 {
     return ret;
 }
 
-pub fn result() [0x3800]u8 {
-    var ret: [0x3800]u8 = undefined;
+pub fn result() [0x3000]u8 {
+    var ret: [0x3000]u8 = undefined;
     const HELPER = @import("./index.zig").HELPER;
 
     for (HELPER) |i, index| {
@@ -32,7 +32,8 @@ pub fn result() [0x3800]u8 {
         const mask = @import("./mask.zig").MASK[ind][0];
         const range: u7 = switch (ind) {
             0, 7 => 64,
-            1...6 => 32,
+            2...5 => 32,
+            1, 6 => continue,
         };
 
         var j: u64 = 0;
