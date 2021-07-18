@@ -8,7 +8,7 @@ using Flux
 output(a::UInt64, b::UInt64) = model(vcat(bits(a), bits(b)))
 
 model = Chain(Dense(128, 256, relu), Dense(256, 256, relu), Dense(256, 64, tanh))
-loss(x, y) = Losses.mse(model(x), y)
+loss(x, y) = Flux.Losses.mse(model(x), y)
 opt = RADAM(0.1)
 epsilon = 0.3
 
@@ -62,11 +62,11 @@ while true
         data = [(x_train, y_train)]
         evalcb() = @show(loss(x_train, y_train))
 
-        for epoch in 1:50
+        for epoch in 1:10
             Flux.train!(loss, parameters, data, opt, cb=evalcb)
         end
-        open("model/weights.txt", "w") do io
-            write(io, params(model))
+        open("model/weights.txt", "a+") do io
+            write(io, string(params(model)))
         end;
 
         model |> cpu
