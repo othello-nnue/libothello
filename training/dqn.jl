@@ -2,11 +2,11 @@ include("./ffi.jl");
 using Bits
 using Flux
 
-function output(a::UInt64, b::UInt64) 
-    model(vcat(Bits.bits(a), Bits.bits(b)))
-end
+output(a::UInt64, b::UInt64) = model(vcat(Bits.bits(a), Bits.bits(b)))
 
 model = Flux.Chain(Dense(128, 256, relu), Dense(256, 256, relu), Dense(256, 64, tanh))
+loss(x, y) = Flux.Losses.mse(model(x), y)
+opt = RADAM(0.1)
 epsilon = 0.3
 
 x_train = []
@@ -52,14 +52,18 @@ while true
     print("YAY\n", length(x_train), length(y_train), "\n")
     if length(x_train) > 2048
         model |> gpu
-        loss(x, y) = Flux.Losses.mse(model(x), y)
-        parameters = params(model)
-        data = [(hcat(x_train...), hcat(y_train...))]
-        opt = Flux.Descent()
+        global opt
         
-        for epoch in 1:1
-            Flux.train!(loss, parameters, data, opt)
+        parameters = params(model)
+        x_train = hcat(x_train...)
+        y_train = hcat(y_train...)
+        data = [(x_train, y_train)]
+        evalcb() = @show(loss(x_train, y_train))
+
+        for epoch in 1:50
+            Flux.train!(loss, parameters, data, opt, cb=evalcb)
         end
+
         model |> cpu
         x_train = []
         y_train = []
