@@ -1,11 +1,14 @@
 include("./ffi.jl");
+#using Pkg
+#Pkg.add("Bits")
+#Pkg.add("Flux")
 using Bits
 using Flux
 
-output(a::UInt64, b::UInt64) = model(vcat(Bits.bits(a), Bits.bits(b)))
+output(a::UInt64, b::UInt64) = model(vcat(bits(a), bits(b)))
 
-model = Flux.Chain(Dense(128, 256, relu), Dense(256, 256, relu), Dense(256, 64, tanh))
-loss(x, y) = Flux.Losses.mse(model(x), y)
+model = Chain(Dense(128, 256, relu), Dense(256, 256, relu), Dense(256, 64, tanh))
+loss(x, y) = Losses.mse(model(x), y)
 opt = RADAM(0.1)
 epsilon = 0.3
 
@@ -25,7 +28,7 @@ while true
         pair = []
         moves = Othello.moves(a,b)
         while moves != 0
-            x = UInt8(Bits.scan1(moves) - 1)
+            x = UInt8(scan1(moves) - 1)
             t = Othello.flip(a, b, x)
             out = output(xor(b, t), xor(a, t, moves & -moves))
             moves &= moves - 1
@@ -41,15 +44,14 @@ while true
         end
         
         flip = Othello.flip(a, b, move)
-        append!(x_train, [vcat(Bits.bits(a), Bits.bits(b))])
+        append!(x_train, [vcat(bits(a), bits(b))])
         append!(y_train, [pair[maxmove][2]])
 
         (a,b) = (xor(b, flip), xor(a, flip, UInt64(1) << move))
     end
-    push!(x_train, vcat(Bits.bits(a), Bits.bits(b)))
-    push!(y_train, (x-> 2*x - 1).(Bits.bits(a)))
+    push!(x_train, vcat(bits(a), bits(b)))
+    push!(y_train, (x-> 2*x - 1).(bits(a)))
 
-    print("YAY\n", length(x_train), length(y_train), "\n")
     if length(x_train) > 2048
         model |> gpu
         global opt
@@ -63,6 +65,9 @@ while true
         for epoch in 1:50
             Flux.train!(loss, parameters, data, opt, cb=evalcb)
         end
+        open("model/weights.txt", "w") do io
+            write(io, params(model))
+        end;
 
         model |> cpu
         x_train = []
