@@ -10,10 +10,21 @@ pub fn build(b: *std.build.Builder) void {
         .name = "utils",
         .path = F{ .path = "game/utils.zig" },
     };
+    const arch = Pkg{
+        .name = "arch",
+        .path = F{
+            .path = switch (std.Target.current.cpu.arch) {
+                .aarch64 => "game/arm64/main.zig",
+                .x86_64 => "game/amd64/main.zig",
+                else => unreachable,
+            },
+        },
+        .dependencies = &.{utils},
+    };
     const othello = Pkg{
         .name = "othello",
         .path = F{ .path = "game/main.zig" },
-        .dependencies = &.{utils},
+        .dependencies = &.{ utils, arch },
     };
     const bench = Pkg{
         .name = "bench",
@@ -120,7 +131,8 @@ pub fn build(b: *std.build.Builder) void {
     {
         var tests = b.addTest("perf/test.zig");
         tests.setTarget(target);
-        tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
+        //tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
+        tests.setBuildMode(mode);
         tests.addPackage(othello);
         test_step.dependOn(&tests.step);
     }

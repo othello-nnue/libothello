@@ -29,43 +29,12 @@ pub fn moves(self: Self) u64 {
     return ret & ~self.board[0] & ~self.board[1];
 }
 
-const pdep = @import("utils").pdep;
-const pext = @import("utils").pext;
-
-const MASK = @import("lut/mask.zig").MASK;
-const MASK2 = @import("lut/mask2.zig").MASK;
-const INDEX = @import("lut/index.zig").INDEX;
-const RESULT = @import("lut/test.zig").known;
-
-pub fn flip_positive(board: [2]u64, place: u6) u64 {
-    var ret: u64 = 0;
-    const t = @as(u64, 1) << place;
-    for (MASK2[place]) |mask| {
-        const o = (board[0] & mask[0]) >> 1;
-        const u = (o ^ (o -% t)) & mask[0];
-        const v = u & board[1] & mask[1];
-        if (u == v) ret |= v;
-    }
-
-    return ret;
-}
-
-pub fn flip_arm(self: Self, place: u6) u64 {
-    return flip_positive(self.board, place) | @bitReverse(u64, flip_positive([2]u64{ @bitReverse(u64, self.board[0]), @bitReverse(u64, self.board[1]) }, ~place));
-}
+const _flip = @import("arch").flip;
 
 /// Returns the set of stones that would be flipped.  
 pub fn flip(self: Self, place: u6) u64 {
     assert(self.board[0] & self.board[1] == 0);
-    if (true)
-        return self.flip_arm(place);
-    var ret: u64 = 0;
-    comptime var i = 0;
-    inline while (i < 4) : (i += 1)
-        ret |= pdep(RESULT[
-            @as(u64, INDEX[place][i]) * 32 + pext(self.board[0], MASK[place][i][0]) * 64 + pext(self.board[1], MASK[place][i][1])
-        ], MASK[place][i][1]);
-    return ret;
+    return _flip(self.board, place);
 }
 
 // https://github.com/ziglang/zig/issues/3696
