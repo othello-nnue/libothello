@@ -116,7 +116,7 @@ pub fn build(b: *std.build.Builder) void {
         run_step.dependOn(&run_cmd.step);
     }
     const test_step = b.step("test", "Run library tests");
-    {
+    if (isa == .x86_64) {
         var tests = b.addTest("game/utils.zig");
         tests.setTarget(target);
         tests.setBuildMode(std.builtin.Mode.ReleaseSafe);

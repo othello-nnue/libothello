@@ -13,6 +13,6 @@ fn flip_positive(board: [2]u64, place: u6) u64 {
     return ret;
 }
 
-pub fn flip(self: [2]u64, place: u6) u64 {
+pub fn flip(board: [2]u64, place: u6) u64 {
     return flip_positive(board, place) | @bitReverse(u64, flip_positive([2]u64{ @bitReverse(u64, board[0]), @bitReverse(u64, board[1]) }, ~place));
 }
