@@ -1,11 +1,14 @@
 language: shell
 os: linux
-dist: bionic
 
 env:
   global:
     - ZIG_DIR=$HOME/zig
   
+arch:
+  - amd64
+  - arm64
+
 jobs:
   fast_finish: true
 
