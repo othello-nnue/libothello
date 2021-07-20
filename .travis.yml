@@ -1,0 +1,23 @@
+language: shell
+os: linux
+dist: bionic
+
+env:
+  global:
+    - ZIG_DIR=$HOME/zig
+  
+jobs:
+  fast_finish: true
+
+before_install:
+  - ./travis_before_install.sh
+  - export PATH=$PATH:$ZIG_DIR
+
+addons:
+  apt:
+    update: true
+
+script:
+  - zig build test
+  - zig build bench
+  - zig fmt --check **.zig
