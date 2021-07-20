@@ -1,14 +1,13 @@
 language: shell
+arch:
+  - amd64
+  - arm64
 os: linux
 
 env:
   global:
     - ZIG_DIR=$HOME/zig
   
-arch:
-  - amd64
-  - arm64
-
 jobs:
   fast_finish: true
 
@@ -19,7 +18,9 @@ before_install:
 addons:
   apt:
     update: true
-    pa
+    packages:
+    - jq
+
 
 script:
   - zig build test
