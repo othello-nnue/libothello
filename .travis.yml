@@ -23,6 +23,7 @@ addons:
 
 
 script:
+  - ls "$ZIG_DIR"
   - zig build test
   - zig build bench
   - zig fmt --check **.zig
