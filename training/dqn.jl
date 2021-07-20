@@ -6,6 +6,19 @@ using Bits
 using Flux
 
 output(a::UInt64, b::UInt64) = model(vcat(bits(a), bits(b)))
+function bitboard_to_array(a::UInt64)
+    ret = []
+    while a != 0
+        x = UInt8(scan1(a) - 1)
+        a &= a - 1
+        push!(ret, x)
+    end
+    return ret
+end
+function play(a::UInt64, b::UInt64, c::UInt8)
+    t = Othello.flip(a, b, c)
+    return (xor(b, t), xor(a, t, UInt64(1) << c))
+end
 
 model = Chain(Dense(128, 256, relu), Dense(256, 256, relu), Dense(256, 64, tanh))
 loss(x, y) = Flux.Losses.mse(model(x), y)
@@ -27,13 +40,7 @@ while true
 
         pair = []
         moves = Othello.moves(a,b)
-        while moves != 0
-            x = UInt8(scan1(moves) - 1)
-            t = Othello.flip(a, b, x)
-            out = output(xor(b, t), xor(a, t, moves & -moves))
-            moves &= moves - 1
-            append!(pair, [(x, -out)])
-        end
+        pair = (x->(x,-output(play(a,b,x)...))).(bitboard_to_array(moves))
 
         maxmove = findmax((x->sum(x[2])).(pair))[2]
         
@@ -43,11 +50,10 @@ while true
             move = pair[maxmove][1]
         end
         
-        flip = Othello.flip(a, b, move)
-        append!(x_train, [vcat(bits(a), bits(b))])
-        append!(y_train, [pair[maxmove][2]])
-
-        (a,b) = (xor(b, flip), xor(a, flip, UInt64(1) << move))
+        push!(x_train, vcat(bits(a), bits(b)))
+        push!(y_train, pair[maxmove][2])
+        
+        (a,b) = play(a, b, move)
     end
     push!(x_train, vcat(bits(a), bits(b)))
     push!(y_train, (x-> 2*x - 1).(bits(a)))
