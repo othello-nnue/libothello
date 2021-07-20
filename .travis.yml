@@ -16,7 +16,7 @@ before_install:
   - wget $URL
   - mkdir "$ZIG_DIR"
   - tar xf $(basename $URL) -C "$HOME"
-  - mv $HOME/$(basename -s .tar.xz $URL) $ZIG_DIR 
+  - mv $HOME/$(basename -s .tar.xz $URL)/* $ZIG_DIR 
   - export PATH=$PATH:$ZIG_DIR
 
 addons:
