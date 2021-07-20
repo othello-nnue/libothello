@@ -15,8 +15,8 @@ pub fn build(b: *std.build.Builder) void {
         .name = "arch",
         .path = F{
             .path = switch (isa) {
-                .aarch64 => "game/arm64/main.zig",
-                .x86_64 => "game/amd64/main.zig",
+                .x86_64, .aarch64 => "game/arm64/main.zig",
+                //.x86_64 => "game/amd64/main.zig",
                 else => unreachable,
             },
         },
@@ -113,6 +113,18 @@ pub fn build(b: *std.build.Builder) void {
         run_cmd.step.dependOn(b.getInstallStep());
 
         const run_step = b.step("bench", "Run benchmark tests");
+        run_step.dependOn(&run_cmd.step);
+    }
+    {
+        const exe = b.addExecutable("perf", "perf/print.zig");
+        exe.setTarget(target);
+        exe.setBuildMode(std.builtin.Mode.ReleaseFast);
+        exe.addPackage(othello);
+
+        const run_cmd = exe.run();
+        run_cmd.step.dependOn(b.getInstallStep());
+
+        const run_step = b.step("perft", "Print perft results");
         run_step.dependOn(&run_cmd.step);
     }
     const test_step = b.step("test", "Run library tests");
