@@ -13,12 +13,13 @@ jobs:
   fast_finish: true
 
 before_install:
-  - ./travis_before_install.sh
+  - ./install_zig.sh
   - export PATH=$PATH:$ZIG_DIR
 
 addons:
   apt:
     update: true
+    pa
 
 script:
   - zig build test
