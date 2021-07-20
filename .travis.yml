@@ -1,23 +1,17 @@
 language: shell
+os: linux
 arch:
   - amd64
   - arm64
-os: linux
 
-env:
-  global:
-    - ZIG_DIR=$HOME/zig
-  
 jobs:
   fast_finish: true
 
 before_install:
   - URL=$(wget -O - https://ziglang.org/download/index.json | jq -r '.master."'$(arch)'-linux".tarball' 2>&1)
   - wget $URL
-  - mkdir "$ZIG_DIR"
   - tar xf $(basename $URL) -C "$HOME"
-  - mv $HOME/$(basename -s .tar.xz $URL)/* $ZIG_DIR 
-  - export PATH=$PATH:$ZIG_DIR
+  - export PATH=$PATH:$HOME/$(basename -s .tar.xz $URL)
 
 addons:
   apt:
