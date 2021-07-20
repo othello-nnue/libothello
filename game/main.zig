@@ -33,12 +33,31 @@ const pdep = @import("utils").pdep;
 const pext = @import("utils").pext;
 
 const MASK = @import("lut/mask.zig").MASK;
+const MASK2 = @import("lut/mask2.zig").MASK;
 const INDEX = @import("lut/index.zig").INDEX;
 const RESULT = @import("lut/test.zig").known;
+
+pub fn flip_positive(board: [2]u64, place: u6) u64 {
+    var ret: u64 = 0;
+    const t = @as(u64, 1) << place;
+    for (MASK2[place]) |mask| {
+        const o = (board[0] & mask[0]) >> 1;
+        const u = (o ^ (o -% t)) & mask[0];
+        const v = u & board[1] & mask[1];
+        if (u == v) ret |= v;
+    }
+
+    return ret;
+}
 
 /// Returns the set of stones that would be flipped.  
 pub fn flip(self: Self, place: u6) u64 {
     assert(self.board[0] & self.board[1] == 0);
+    if (true) {
+        var ret = flip_positive(self.board, place);
+        ret |= @bitReverse(u64, flip_positive([2]u64{ @bitReverse(u64, self.board[0]), @bitReverse(u64, self.board[1]) }, 63 - place));
+        return ret;
+    }
     var ret: u64 = 0;
     comptime var i = 0;
     inline while (i < 4) : (i += 1)
