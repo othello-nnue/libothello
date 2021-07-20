@@ -1,5 +1,7 @@
 const Game = @import("othello");
-const expect = @import("std").testing.expect;
+const testing = @import("std").testing;
+const expect = testing.expect;
+const expectEqual = testing.expectEqual;
 
 pub fn perft(board: Game, depth: usize) u64 {
     if (depth == 0) return 1;
@@ -56,7 +58,7 @@ test "assign test" {
 
 test "perft test" {
     inline for (known_perft) |known, i|
-        try expect(perft(.{}, i) == known);
+        try expectEqual(perft(.{}, i), known);
 }
 
 test "check test" {

@@ -20,4 +20,9 @@ Name | Type | Size
 
 ## ARM
 
-The ARM implementation will use [Hyperbola Quintessence](https://www.chessprogramming.org/Hyperbola_Quintessence) with [rbit instruction](https://developer.arm.com/documentation/ddi0596/2021-06/Base-Instructions/RBIT--Reverse-Bits-) and 4KiB of LUT. 
+The ARM implementation uses [Hyperbola Quintessence](https://www.chessprogramming.org/Hyperbola_Quintessence) with [rbit instruction](https://developer.arm.com/documentation/ddi0596/2021-06/Base-Instructions/RBIT--Reverse-Bits-) and 4KiB of LUT. 
+
+
+Name | Type | Size
+----:|----:|----:
+`mask`|`[64][4][2]u64`|4KiB

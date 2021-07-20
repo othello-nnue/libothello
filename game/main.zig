@@ -50,14 +50,15 @@ pub fn flip_positive(board: [2]u64, place: u6) u64 {
     return ret;
 }
 
+pub fn flip_arm(self: Self, place: u6) u64 {
+    return flip_positive(self.board, place) | @bitReverse(u64, flip_positive([2]u64{ @bitReverse(u64, self.board[0]), @bitReverse(u64, self.board[1]) }, ~place));
+}
+
 /// Returns the set of stones that would be flipped.  
 pub fn flip(self: Self, place: u6) u64 {
     assert(self.board[0] & self.board[1] == 0);
-    if (true) {
-        var ret = flip_positive(self.board, place);
-        ret |= @bitReverse(u64, flip_positive([2]u64{ @bitReverse(u64, self.board[0]), @bitReverse(u64, self.board[1]) }, 63 - place));
-        return ret;
-    }
+    if (true)
+        return self.flip_arm(place);
     var ret: u64 = 0;
     comptime var i = 0;
     inline while (i < 4) : (i += 1)
