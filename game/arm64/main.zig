@@ -1,12 +1,18 @@
 const MASK = @import("./mask.zig").MASK;
+const mul = @import("utils").mul;
 
 fn flip_positive(board: [2]u64, place: u6) u64 {
     var ret: u64 = 0;
     const t = @as(u64, 1) << place;
-    for (MASK[place]) |mask| {
-        const o = (board[0] & mask[0]) >> 1;
-        const u = (o ^ (o -% t)) & mask[0];
-        const v = u & board[1] & mask[1];
+    for (MASK[place]) |m, i| {
+        const o = (board[0] & m) >> 1;
+        const u = (o ^ (o -% t)) & m;
+        const v = u & board[1] & switch (i) {
+            0 => mul(0xFF, 0x7E),
+            1 => mul(0x7E, 0xFF),
+            2, 3 => mul(0x7E, 0x7E),
+            else => unreachable,
+        };
         if (u == v) ret |= v;
     }
     return ret;

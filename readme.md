@@ -1,6 +1,6 @@
 # Intro
 
-This is [Zig](ziglang.org) port of [Othello move generator](https://gitlab.com/rust-othello/8x8-othello), currently optimized for Intel Skylake microarchitecture.
+This is [Zig](ziglang.org) port of [Othello move generator](https://gitlab.com/rust-othello/8x8-othello).
 
 # Move generation
 
@@ -20,9 +20,9 @@ Name | Type | Size
 
 ## ARM
 
-The ARM implementation uses [Hyperbola Quintessence](https://www.chessprogramming.org/Hyperbola_Quintessence) with [rbit instruction](https://developer.arm.com/documentation/ddi0596/2021-06/Base-Instructions/RBIT--Reverse-Bits-) and 4KiB of LUT. 
+The ARM implementation uses [Hyperbola Quintessence](https://www.chessprogramming.org/Hyperbola_Quintessence) with [rbit instruction](https://developer.arm.com/documentation/ddi0596/2021-06/Base-Instructions/RBIT--Reverse-Bits-) and 2KiB of LUT. 
 
 
 Name | Type | Size
 ----:|----:|----:
-`mask`|`[64][4][2]u64`|4KiB
+`mask`|`[64][4]u64`|2KiB

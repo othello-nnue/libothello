@@ -29,12 +29,10 @@ pub fn moves(self: Self) u64 {
     return ret & ~self.board[0] & ~self.board[1];
 }
 
-const _flip = @import("arch").flip;
-
 /// Returns the set of stones that would be flipped.  
 pub fn flip(self: Self, place: u6) u64 {
     assert(self.board[0] & self.board[1] == 0);
-    return _flip(self.board, place);
+    return @import("arch").flip(self.board, place);
 }
 
 // https://github.com/ziglang/zig/issues/3696
