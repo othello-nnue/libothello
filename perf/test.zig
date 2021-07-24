@@ -65,6 +65,7 @@ test "check test" {
     try expect(!check(.{}, 11));
 }
 
+//https://www.aartbik.com/strategy.php
 const known_perft = .{
     1,
     4,
@@ -79,4 +80,6 @@ const known_perft = .{
     24571284,
     212258800,
     1939886636,
+    18429641748,
+    184042084512,
 };
