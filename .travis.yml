@@ -20,6 +20,6 @@ addons:
 
 
 script:
-  - zig build test
-  - travis_wait 180 zig build bench
+  - travis_wait 180 zig build test
+  - zig build bench
   - zig fmt --check **.zig
