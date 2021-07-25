@@ -21,5 +21,5 @@ addons:
 
 script:
   - zig build test
-  - zig build bench
+  - travis_wait 180 zig build bench
   - zig fmt --check **.zig
