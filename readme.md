@@ -26,3 +26,10 @@ The ARM implementation uses [Hyperbola Quintessence](https://www.chessprogrammin
 Name | Type | Size
 ----:|----:|----:
 `mask`|`[64][4]u64`|2KiB
+
+# Evaluation
+
+
+## Alphazero
+
+We use [improved](https://arxiv.org/abs/2007.12509) version of AlphaZero to generate high quality games, and train NNUE on those dataset.
