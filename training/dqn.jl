@@ -42,6 +42,13 @@ function model_agent(a::UInt64, b::UInt64)
     return pair[maxmove][1]
 end
 
+function good_agent(a::UInt64, b::UInt64)
+    moves = Othello.moves(a,b)
+    pair = (x->(x,Othello.moves(play(a,b,x)...))).(bitboard_to_array(moves))
+    maxmove = findmin((x->count_ones(x[2])).(pair))[2]
+    return pair[maxmove][1]
+end
+
 function against_random()
     turn = rand(Bool)
 
@@ -61,16 +68,20 @@ function against_random()
         (a,b) = play(a, b, move)
     end
     score = count_ones(a)
-    if !turn
+    if turn
         score = 64 - score
     end
     return score
 end
 
+RADAMW(η = 0.001, β = (0.9, 0.999), decay = 0) =
+  Flux.Optimiser(RADAM(1, β), WeightDecay(decay), Descent(η))
+
+
 model = Chain(Dense(128, 256, relu), Dense(256, 256, relu), Dense(256, 64, tanh))
 loss(x, y) = Flux.Losses.mse(model(x), y)
-opt = RADAM(0.1)
-epsilon = 0.3
+opt = RADAMW(0.1, (0.9, 0.999), 1)
+epsilon = 0.9
 
 x_train = []
 y_train = []
@@ -100,12 +111,12 @@ while true
         push!(x_train, vcat(bits(a), bits(b)))
         push!(y_train, pair[maxmove][2])
         
-        (a,b) = play(a, b, move)
+        (a, b) = play(a, b, move)
     end
-    push!(x_train, vcat(bits(a), bits(b)))
-    push!(y_train, (x-> 2*x - 1).(bits(a)))
+    #push!(x_train, vcat(bits(a), bits(b)))
+    #push!(y_train, (x-> 2*x - 1).(bits(a)))
 
-    if length(x_train) > 2048
+    if length(x_train) > 8192
 
         t = (x->against_random()).(1:100)
         print(sum(t)/length(t), "\n")
@@ -119,7 +130,7 @@ while true
         data = [(x_train, y_train)]
         evalcb() = @show(loss(x_train, y_train))
 
-        for epoch in 1:10
+        for epoch in 1:2
             Flux.train!(loss, parameters, data, opt, cb=evalcb)
         end
         #open("model/weights.txt", "a+") do io
