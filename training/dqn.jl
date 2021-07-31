@@ -5,7 +5,14 @@ include("./ffi.jl");
 using Bits
 using Flux
 
-output(a::UInt64, b::UInt64) = model(vcat(bits(a), bits(b)))
+#output(a::UInt64, b::UInt64) = model(vcat(bits(a), bits(b)))
+function output(a::UInt64, b::UInt64) 
+    stable = Othello.stable(a, b)
+    temp = model(vcat(bits(a), bits(b)))
+    temp = max.(2 * Bits.bits(stable & a) .- 1,temp)
+    temp = min.(1 .- 2 * Bits.bits(stable & b),temp)
+    return temp
+end
 function bitboard_to_array(a::UInt64)
     ret = []
     while a != 0
@@ -15,9 +22,49 @@ function bitboard_to_array(a::UInt64)
     end
     return ret
 end
+
 function play(a::UInt64, b::UInt64, c::UInt8)
     t = Othello.flip(a, b, c)
+    @assert t != 0
     return (xor(b, t), xor(a, t, UInt64(1) << c))
+end
+
+function rand_agent(a::UInt64, b::UInt64)
+    moves = Othello.moves(a,b)
+    pair = bitboard_to_array(moves)
+    return rand(pair)
+end
+
+function model_agent(a::UInt64, b::UInt64)
+    moves = Othello.moves(a,b)
+    pair = (x->(x,-output(play(a,b,x)...))).(bitboard_to_array(moves))
+    maxmove = findmax((x->sum(x[2])).(pair))[2]
+    return pair[maxmove][1]
+end
+
+function against_random()
+    turn = rand(Bool)
+
+    a = 0x0000_0008_1000_0000
+    b = 0x0000_0010_0800_0000
+    while Othello.moves(a,b) != 0 || Othello.moves(b,a) != 0
+        if Othello.moves(a,b) == 0
+            (a,b) = (b,a)
+        else
+            turn = !turn
+        end
+        if turn
+            move = model_agent(a,b)
+        else
+            move = rand_agent(a,b)
+        end
+        (a,b) = play(a, b, move)
+    end
+    score = count_ones(a)
+    if !turn
+        score = 64 - score
+    end
+    return score
 end
 
 model = Chain(Dense(128, 256, relu), Dense(256, 256, relu), Dense(256, 64, tanh))
@@ -59,6 +106,10 @@ while true
     push!(y_train, (x-> 2*x - 1).(bits(a)))
 
     if length(x_train) > 2048
+
+        t = (x->against_random()).(1:100)
+        print(sum(t)/length(t), "\n")
+
         model |> gpu
         global opt
         
@@ -71,9 +122,9 @@ while true
         for epoch in 1:10
             Flux.train!(loss, parameters, data, opt, cb=evalcb)
         end
-        open("model/weights.txt", "a+") do io
-            write(io, string(params(model)))
-        end;
+        #open("model/weights.txt", "a+") do io
+        #    write(io, string(params(model)))
+        #end;
 
         model |> cpu
         x_train = []
