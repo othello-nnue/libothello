@@ -1,16 +1,14 @@
-# Intro
-
+# Introduction
 This is [Zig](ziglang.org) port of [Othello move generator](https://gitlab.com/rust-othello/8x8-othello).
 
-# Move generation
+# Directory structure
 
-The move generation part implements the [Kogge-Stone Algorithm](https://www.chessprogramming.org/Kogge-Stone_Algorithm), intended to compile to SIMD instructions. 
+# Move generation
+We use [Kogge-Stone Algorithm](https://www.chessprogramming.org/Kogge-Stone_Algorithm), intended to compile to SIMD instructions, for move generation. 
 
 # Move resolution
-
-## BMI2
-
-The BMI2 implementation uses PDEP/PEXT instructions and 16.5KiB of LUT, which would fit in the L1D cache. I have an idea to reduce LUT size to 14.5KiB, I might switch to that implementation after benchmarking.  
+## AMD64
+On x86-64-v3 processors it uses PDEP/PEXT instructions and 16.5KiB of LUT, which would fit in the L1D cache. I have an idea to reduce LUT size to 14.5KiB, I might switch to that implementation after benchmarking.  
 
 Name | Type | Size
 ----:|----:|----:
@@ -19,9 +17,8 @@ Name | Type | Size
 `result`|`[0x3000]u8`|12KiB
 
 ## ARM
-
-The ARM implementation uses [Hyperbola Quintessence](https://www.chessprogramming.org/Hyperbola_Quintessence) with [rbit instruction](https://developer.arm.com/documentation/ddi0596/2021-06/Base-Instructions/RBIT--Reverse-Bits-) and 2KiB of LUT. 
-
+On ARM processors it uses [rbit instruction](https://developer.arm.com/documentation/ddi0596/2021-06/Base-Instructions/RBIT--Reverse-Bits-) and 2KiB of LUT
+implementing [Hyperbola Quintessence](https://www.chessprogramming.org/Hyperbola_Quintessence).
 
 Name | Type | Size
 ----:|----:|----:
@@ -29,7 +26,18 @@ Name | Type | Size
 
 # Evaluation
 
+## AlphaZero
+We use AlphaZero to generate high quality games, and train NNUE on those games. 
 
-## Alphazero
+## PoZero
+There is an [improved](https://arxiv.org/abs/2007.12509) version of AlphaZero, allowing to work better on low-nodes regime. 
 
-We use [improved](https://arxiv.org/abs/2007.12509) version of AlphaZero to generate high quality games, and train NNUE on those dataset.
+## Improved PoZero
+The value of a node is $\frac{q_0+n\mathbf{q}\cdot\boldsymbol{\hat{\pi}}}{1+n}$ where $q_0$ is the initial value estimate. We use $q\cdot\boldsymbol{\bar{\pi}}$ instead. This value is the expectation of value when both agent plays with $\bar{\pi}$ symbol, which is implicit assumption in PoZero search. This modification allows value to propagate in a way closer to minimax. 
+
+"When a promising new (high-value) leaf is discovered, many additional simulations might be needed before this information is reflected in $\hat{\pi}$; since $\bar{\pi}$ is directly computed from Q-values, this information is updated instantly."
+
+This modification is expected to shine when the tree is deep. 
+
+## DAG
+With above modifications, the search does not rely on the number of visits of child nodes, therefore it can be used on any DAG. 
