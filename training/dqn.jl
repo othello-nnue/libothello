@@ -5,12 +5,16 @@ include("./ffi.jl");
 using Bits
 using Flux
 
+toplane(a::UInt64) = reshape(bits(a), 8, 8, 1, 1)
+
+input(a::UInt64, b::UInt64) = cat(toplane(a), toplane(b), dims = 3)
+
 #output(a::UInt64, b::UInt64) = model(vcat(bits(a), bits(b)))
 function output(a::UInt64, b::UInt64) 
     stable = Othello.stable(a, b)
-    temp = model(vcat(bits(a), bits(b)))
-    temp = max.(2 * Bits.bits(stable & a) .- 1,temp)
-    temp = min.(1 .- 2 * Bits.bits(stable & b),temp)
+    temp = model(input(a, b))
+    temp = max.(2 * toplane(stable & a) .- 1,temp)
+    temp = min.(1 .- 2 * toplane(stable & b),temp)
     return temp
 end
 function bitboard_to_array(a::UInt64)
@@ -78,7 +82,17 @@ RADAMW(η = 0.001, β = (0.9, 0.999), decay = 0) =
   Flux.Optimiser(RADAM(1, β), WeightDecay(decay), Descent(η))
 
 
-model = Chain(Dense(128, 256, relu), Dense(256, 256, relu), Dense(256, 64, tanh))
+#model = Chain(Dense(128, 256, relu), Dense(256, 256, relu), Dense(256, 64, tanh))
+nf = 32 #number of filters
+model = Chain(
+    Conv((3, 3), 2=>nf, relu, pad=SamePad()),
+    Conv((3, 3), nf=>nf, relu, pad=SamePad()),
+    Conv((3, 3), nf=>nf, relu, pad=SamePad()),
+    Conv((3, 3), nf=>nf, relu, pad=SamePad()),
+    Conv((3, 3), nf=>nf, relu, pad=SamePad()),
+    Conv((3, 3), nf=>nf, relu, pad=SamePad()),
+    Conv((3, 3), nf=>1, tanh, pad=SamePad()),
+)
 loss(x, y) = Flux.Losses.mse(model(x), y)
 opt = RADAMW(0.1, (0.9, 0.999), 1)
 epsilon = 0.9
@@ -108,7 +122,7 @@ while true
             move = pair[maxmove][1]
         end
         
-        push!(x_train, vcat(bits(a), bits(b)))
+        push!(x_train, input(a, b))
         push!(y_train, pair[maxmove][2])
         
         (a, b) = play(a, b, move)
@@ -116,7 +130,7 @@ while true
     #push!(x_train, vcat(bits(a), bits(b)))
     #push!(y_train, (x-> 2*x - 1).(bits(a)))
 
-    if length(x_train) > 8192
+    if length(x_train) > 256
 
         t = (x->against_random()).(1:100)
         print(sum(t)/length(t), "\n")
