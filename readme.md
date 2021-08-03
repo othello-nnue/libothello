@@ -33,11 +33,9 @@ We use AlphaZero to generate high quality games, and train NNUE on those games.
 There is an [improved](https://arxiv.org/abs/2007.12509) version of AlphaZero, allowing to work better on low-nodes regime. 
 
 ## Improved PoZero
-The value of a node is $\frac{q_0+n\mathbf{q}\cdot\boldsymbol{\hat{\pi}}}{1+n}$ where $q_0$ is the initial value estimate. We use $q\cdot\boldsymbol{\bar{\pi}}$ instead. This value is the expectation of value when both agent plays with $\bar{\pi}$ symbol, which is implicit assumption in PoZero search. This modification allows value to propagate in a way closer to minimax. 
+The value of a node is approximately $\mathbb{q}\cdot\boldsymbol{\hat{\pi}}$ where $q_0$ is the initial value estimate. We instead use roughly $\mathbb{q}\cdot\boldsymbol{\bar{\pi}}$ which is the value when both agent plays with the search poliy. This allows value to propagate in a more minimax-like way.
 
 "When a promising new (high-value) leaf is discovered, many additional simulations might be needed before this information is reflected in $\hat{\pi}$; since $\bar{\pi}$ is directly computed from Q-values, this information is updated instantly."
-
-This modification is expected to shine when the tree is deep. 
 
 ## DAG
 With above modifications, the search does not rely on the number of visits of child nodes, therefore it can be used on any DAG. 

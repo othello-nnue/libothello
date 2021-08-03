@@ -24,6 +24,18 @@ fn gaid(x: u64) u64 {
     return deltaswap(y, 36, mul(0x0f, 0x0f));
 }
 
+fn rot(x: u64) u64 {
+    return @bitReverse(u64, x);
+}
+
+fn rot1(x: u64) u64 {
+    return vert(diag(x));
+}
+
+fn rot3(x: u64) u64 {
+    return vert(gaid(x));
+}
+
 fn testbit(comptime t: fn (u6) u6, comptime u: fn (u64) u64) bool {
     comptime var i = 0;
     inline while (i < 64) : (i += 1)
