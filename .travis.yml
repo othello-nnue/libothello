@@ -22,4 +22,4 @@ addons:
 script:
   - travis_wait 180 zig build test
   - zig build bench
-  - zig fmt --check **.zig
+  - zig fmt --check .

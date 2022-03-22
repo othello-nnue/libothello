@@ -16,4 +16,4 @@ jobs:
       - name: Run Bench
         run: zig build bench
       - name: Check Formatting
-        run: zig fmt --check **.zig
+        run: zig fmt --check .
