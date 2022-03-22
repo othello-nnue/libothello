@@ -6,14 +6,9 @@ const os = std.os.linux;
 const stdin = std.io.getStdIn();
 const stdout = std.io.getStdOut();
 
-const VTIME = 5;
-const VMIN = 6;
-
 var x: u3 = 0;
 var y: u3 = 0;
 var z: u1 = 0;
-
-var seq = [_]u8{255} ** 64;
 
 var game = Game{};
 const eng = engine.ab{ .depth = 8, .eval = engine.evals.good };
@@ -34,7 +29,7 @@ pub fn main() anyerror!void {
         }
         if (z == 1) {
             const move = eng.move(game);
-            seq[@popCount(u64, game.board[0] | game.board[1])] = move;
+            std.debug.print("{}\t", .{move});
             game = game.move(move).?;
             z ^= 1;
             try render();
@@ -48,9 +43,9 @@ pub fn main() anyerror!void {
             'C', 'L', 'l', 'd' => x +%= 1,
             'B', 'J', 'j', 's' => y +%= 1,
             'A', 'K', 'k', 'w' => y -%= 1,
-            ' ' => {
+            ' ', '\r' => {
                 if (game.move(@as(u6, y) * 8 + x)) |newgame| {
-                    seq[@popCount(u64, game.board[0] | game.board[1])] = @as(u6, y) * 8 + x;
+                    std.debug.print("{}\t", .{@as(u6, y) * 8 + x});
                     game = newgame;
                     z ^= 1;
                 } else continue;
@@ -66,11 +61,6 @@ pub fn main() anyerror!void {
         -32...-1 => try stdout.writeAll("X wins"),
         else => unreachable,
     }
-
-    const writer = stdout.writer();
-    for (seq) |i| {
-        try writer.print("\t{}", .{i});
-    }
 }
 
 //rawmode but with OPOST
@@ -80,26 +70,17 @@ fn rawmode() os.termios {
     var original_termios = termios;
 
     //man 3 termios
-    termios.iflag &= ~@as(
-        os.tcflag_t,
-        os.IGNBRK | os.BRKINT | os.PARMRK | os.ISTRIP |
-            os.INLCR | os.IGNCR | os.ICRNL | os.IXON,
-    );
-    termios.lflag &= ~@as(
-        os.tcflag_t,
-        os.ECHO | os.ECHONL | os.ICANON | os.ISIG | os.IEXTEN,
-    );
+    termios.iflag &= ~@as(os.tcflag_t, os.IGNBRK | os.BRKINT | os.PARMRK | os.ISTRIP | os.INLCR | os.IGNCR | os.ICRNL | os.IXON);
+    termios.lflag &= ~@as(os.tcflag_t, os.ECHO | os.ECHONL | os.ICANON | os.ISIG | os.IEXTEN);
     termios.cflag &= ~@as(os.tcflag_t, os.CSIZE | os.PARENB);
     termios.cflag |= os.CS8;
 
-    termios.cc[VMIN] = 1;
-    termios.cc[VTIME] = 0;
+    termios.cc[5] = 0; // set VTIME
+    termios.cc[6] = 1; // set VMIN
 
     _ = os.tcsetattr(stdin.handle, .FLUSH, &termios);
     return original_termios;
 }
-
-const bytes = ".ox*@OX@";
 
 fn render() !void {
     var out = ("\x1B[1;1H" ++ ("." ** 8 ++ "\n") ** 8).*;
@@ -113,11 +94,12 @@ fn render() !void {
             k = 1;
         } else if (game.board[~z] & j != 0) {
             k = 2;
-        } else if (moves & j != 0)
+        } else if (moves & j != 0) {
             k = 3;
+        }
         if (@as(u6, y) * 8 + x == i) k += 4;
 
-        out[i + "\x1B[1;1H".len + (i >> 3)] = bytes[k];
+        out[i + "\x1B[1;1H".len + (i >> 3)] = ".ox*@OX@"[k];
     }
     try stdout.writeAll(&out);
 }
