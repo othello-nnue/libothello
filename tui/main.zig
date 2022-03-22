@@ -75,7 +75,7 @@ pub fn main() anyerror!void {
 
 //rawmode but with OPOST
 fn rawmode() os.termios {
-    var termios : os.termios = undefined;
+    var termios: os.termios = undefined;
     _ = os.tcgetattr(stdin.handle, &termios);
     var original_termios = termios;
 

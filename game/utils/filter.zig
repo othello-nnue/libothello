@@ -8,11 +8,21 @@ fn mul2(x: u8, y: u8) u64 {
     return pdep(x, 0x0101_0101_0101_0101) * y;
 }
 
+fn mul3(x: u8, y: u8) u64 {
+    comptime var i = 0;
+    var res: u64 = 0;
+    inline while (i < 8) : (i += 1) {
+        if (x & (1 << i) != 0)
+            res |= @as(u64, y) << (i * 8);
+    }
+    return res;
+}
+
 const std = @import("std");
 test "check mul" {
-    comptime var i: u8 = 0;
+    comptime var i = 0;
     inline while (true) : (i += 1) {
-        try std.testing.expectEqual(mul(i, 1), mul2(i, 1));
+        try std.testing.expectEqual(mul(i, 1), mul3(i, 1));
         if (i == 0xFF) break;
     }
 }
