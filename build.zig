@@ -1,19 +1,24 @@
 const std = @import("std");
 const Pkg = std.build.Pkg;
-const F = std.build.FileSource;
+const FS = std.build.FileSource;
+
+const utils = Pkg{
+    .name = "utils",
+    .path = FS{ .path = "game/utils.zig" },
+};
+const bench = Pkg{
+    .name = "bench",
+    .path = FS{ .path = "zig-bench/bench.zig" },
+};
 
 pub fn build(b: *std.build.Builder) void {
     const target = b.standardTargetOptions(.{});
     const mode = b.standardReleaseOptions();
     const isa = target.cpu_arch orelse @import("builtin").target.cpu.arch;
 
-    const utils = Pkg{
-        .name = "utils",
-        .path = F{ .path = "game/utils.zig" },
-    };
     const arch = Pkg{
         .name = "arch",
-        .path = F{
+        .path = FS{
             .path = switch (isa) {
                 .aarch64 => "game/arm64/main.zig",
                 .x86_64 => "game/amd64/main.zig",
@@ -24,16 +29,12 @@ pub fn build(b: *std.build.Builder) void {
     };
     const othello = Pkg{
         .name = "othello",
-        .path = F{ .path = "game/main.zig" },
+        .path = FS{ .path = "game/main.zig" },
         .dependencies = &.{ utils, arch },
-    };
-    const bench = Pkg{
-        .name = "bench",
-        .path = F{ .path = "zig-bench/bench.zig" },
     };
     const engine = Pkg{
         .name = "engine",
-        .path = F{ .path = "engine/main.zig" },
+        .path = FS{ .path = "engine/main.zig" },
         .dependencies = &.{othello},
     };
     {
@@ -65,7 +66,7 @@ pub fn build(b: *std.build.Builder) void {
             run_cmd.addArgs(args);
         }
 
-        const run_step = b.step("run", "Run the app");
+        const run_step = b.step("run", "Run TUI app");
         run_step.dependOn(&run_cmd.step);
     }
     {
