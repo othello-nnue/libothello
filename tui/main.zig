@@ -2,7 +2,7 @@ const std = @import("std");
 const Game = @import("othello");
 const engine = @import("engine");
 
-const os = std.os;
+const os = std.os.linux;
 const stdin = std.io.getStdIn();
 const stdout = std.io.getStdOut();
 
@@ -19,8 +19,8 @@ var game = Game{};
 const eng = engine.ab{ .depth = 8, .eval = engine.evals.good };
 
 pub fn main() anyerror!void {
-    const original_termios = try rawmode();
-    defer os.tcsetattr(stdin.handle, .FLUSH, original_termios) catch {};
+    const original_termios = rawmode();
+    defer _ = os.tcsetattr(stdin.handle, .FLUSH, &original_termios);
 
     try stdout.writeAll("\x1B[?25l\x1B[2J"); //hide cursor, clear screen
     defer stdout.writeAll("\x1B[?25h") catch {}; //show cursor
@@ -74,8 +74,9 @@ pub fn main() anyerror!void {
 }
 
 //rawmode but with OPOST
-fn rawmode() !os.termios {
-    var termios = try os.tcgetattr(stdin.handle);
+fn rawmode() os.termios {
+    var termios : os.termios = undefined;
+    _ = os.tcgetattr(stdin.handle, &termios);
     var original_termios = termios;
 
     //man 3 termios
@@ -94,7 +95,7 @@ fn rawmode() !os.termios {
     termios.cc[VMIN] = 1;
     termios.cc[VTIME] = 0;
 
-    try os.tcsetattr(stdin.handle, .FLUSH, termios);
+    _ = os.tcsetattr(stdin.handle, .FLUSH, &termios);
     return original_termios;
 }
 
