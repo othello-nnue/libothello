@@ -5,7 +5,7 @@ const F = std.build.FileSource;
 pub fn build(b: *std.build.Builder) void {
     const target = b.standardTargetOptions(.{});
     const mode = b.standardReleaseOptions();
-    const isa = target.cpu_arch orelse std.Target.current.cpu.arch;
+    const isa = target.cpu_arch orelse @import("builtin").target.cpu.arch;
 
     const utils = Pkg{
         .name = "utils",
@@ -15,8 +15,8 @@ pub fn build(b: *std.build.Builder) void {
         .name = "arch",
         .path = F{
             .path = switch (isa) {
-                .x86_64, .aarch64 => "game/arm64/main.zig",
-                //.x86_64 => "game/amd64/main.zig",
+                .aarch64 => "game/arm64/main.zig",
+                .x86_64 => "game/amd64/main.zig",
                 else => unreachable,
             },
         },
