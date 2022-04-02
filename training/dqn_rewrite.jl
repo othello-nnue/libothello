@@ -66,8 +66,8 @@ while true
         
         g = g + move
     end
-    #push!(x_train, vcat(bits(a), bits(b)))
-    #push!(y_train, (x-> 2*x - 1).(bits(a)))
+    push!(x_train, input(g))
+    push!(y_train, (x-> 2*x - 1).(bits(g.a)))
 
     if length(x_train) > 256
 
