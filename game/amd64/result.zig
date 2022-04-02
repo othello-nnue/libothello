@@ -23,12 +23,22 @@ fn res(i: u3, p: u8, n: u8) u8 {
     return ret;
 }
 
+//https://github.com/ziglang/zig/issues/11312
+
+extern fn @"llvm.assume"(bool) void;
+fn intCast(T: type, a: anytype) T {
+    b = @intCast(T, a);
+    if (a != b) unreachable;
+    @"llvm.assume"(a == b);
+    return b;
+}
+
 pub fn result() [0x3000]u8 {
     var ret: [0x3000]u8 = undefined;
     const HELPER = @import("./index.zig").HELPER;
 
     for (HELPER) |i, index| {
-        const ind = @intCast(u3, index);
+        const ind = intCast(u3, index);
         const mask = @import("./mask.zig").MASK[ind][0];
         const range: u7 = switch (ind) {
             0, 7 => 64,
@@ -41,10 +51,10 @@ pub fn result() [0x3000]u8 {
             var k: u64 = 0;
             while (k < range) : (k += 1) {
                 const ii = i * 32 + j * 64 + k;
-                const jj = @intCast(u8, pdep(j, mask[0]));
-                const kk = @intCast(u8, pdep(k, mask[1]));
+                const jj = intCast(u8, pdep(j, mask[0]));
+                const kk = intCast(u8, pdep(k, mask[1]));
 
-                ret[ii] = @intCast(u8, pext(res(ind, jj, kk), mask[1]));
+                ret[ii] = intCast(u8, pext(res(ind, jj, kk), mask[1]));
             }
         }
     }
