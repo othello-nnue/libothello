@@ -44,6 +44,6 @@ nf = 32 #number of filters
 #     Conv((3, 3), nf=>1, tanh, pad=SamePad()),
 # )
 model = Chain(block(nf), block(nf), block(nf), block(nf), block(nf), block(nf))
-loss(x, y) = Flux.Losses.mse(model(x), y)
-opt = RADAMW(0.1, (0.9, 0.999), 1)
-epsilon = 0.9
+
+RADAMW(η = 0.001, β = (0.9, 0.999), decay = 0) =
+  Flux.Optimiser(RADAM(1, β), WeightDecay(decay), Descent(η))
