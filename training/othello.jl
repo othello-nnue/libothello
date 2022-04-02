@@ -1,3 +1,6 @@
+using Bits
+include("./ffi.jl");
+include("./bitboard.jl");
 struct Game
     a::UInt64
     b::UInt64
@@ -12,6 +15,7 @@ function Base.:+(a::Game, b::UInt8)
 end
 
 moves(a::Game) = bitboard_to_array(rawmoves(a))
+num_moves(a::Game) = count_ones(rawmoves(a))
 rawmoves(a::Game) = Othello.moves(a.a, a.b)
 notend(a::Game) = rawmoves(a) != 0 || rawmoves(flip(a)) != 0
 flip(a::Game) = Game(a.b, a.a)
@@ -35,4 +39,20 @@ function playwhile(agent1, agent2, logger)
         logger(g, move, turn)
         g = g + move
     end
+    return g
+end
+
+rand_agent(a::Game) = rand(moves(a))
+good_agent(a::Game) = model_agent(a, num_moves)
+
+function model_agent(a::Game, value)
+    list = moves(a)
+    maxmove = findmin(x -> value(a + x), list)[2]
+    return list[maxmove]
+end
+
+function value_move(a::Game, value)
+    list = moves(a)
+    mm = findmin(x -> value(a + x), list)
+    return (-mm[1], list[mm[2]])
 end
