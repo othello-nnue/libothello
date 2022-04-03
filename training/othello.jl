@@ -8,7 +8,7 @@ end
 
 Move = UInt8
 
-function Base.:+(a::Game, b::UInt8)
+function Base.:+(a::Game, b::UInt8)::Game
     t = Othello.flip(a.a, a.b, b)
     @assert t != 0
     return Game(xor(a.b, t), xor(a.a, t, UInt64(1) << b))
@@ -45,14 +45,20 @@ end
 rand_agent(a::Game) = rand(moves(a))
 good_agent(a::Game) = model_agent(a, num_moves)
 
-function model_agent(a::Game, value)
+function model_agent(a::Game, value)::UInt8
     list = moves(a)
     maxmove = findmin(x -> value(a + x), list)[2]
     return list[maxmove]
 end
 
-function value_move(a::Game, value)
+function value_move(a::Game, value)::UInt8
     list = moves(a)
     mm = findmin(x -> value(a + x), list)
     return (-mm[1], list[mm[2]])
+end
+
+function agent(value, a::Game)::UInt8
+    list = moves(a)
+    maxmove = findmin(x -> value(a + x), list)[2]
+    return list[maxmove]
 end

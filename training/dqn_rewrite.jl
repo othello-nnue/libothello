@@ -3,6 +3,8 @@ include("./model.jl");
 using Bits
 using Flux
 
+model = Dense(128, 64, tanh)
+
 #toplane(a::UInt64) = reshape(bits(a), 8, 8, 1, 1)
 input(a::Game) = vcat(bits(a.a), bits(a.b))
 output(a::Game) = model(input(a))
@@ -32,9 +34,6 @@ function against_random()
     end
     return score
 end
-
-
-model = Dense(128, 64, tanh)
 
 loss(x, y) = Flux.Losses.mse(model(x), y)
 opt = RADAMW(0.1, (0.9, 0.999), 1)
