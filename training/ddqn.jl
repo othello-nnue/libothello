@@ -59,9 +59,9 @@ function generate_traindata!(value_net, act_net, position, value)
 end
 
 opt = RADAMW(0.1, (0.9, 0.999), 1)
-epsilon = 0.9
+epsilon = 0.2
 
-while true
+for i in 1:10000000000000
     x_train1 = []
     y_train1 = []
 
@@ -85,28 +85,30 @@ while true
     x_train2 = hcat(x_train2...)
     y_train2 = hcat(y_train2...)
 
-    t = (x -> against_random()).(1:100)
-    print(sum(t) / length(t), "\n")
-
     # model |> gpu
     global opt
 
-    parameters = params(model1)
-    data = [(x_train1, y_train1)]
-    loss(x, y) = Flux.Losses.mse(model1(x), y)
-    evalcb() = @show(loss(x_train1, y_train1))
+    parameters1 = params(model1)
+    data1 = [(x_train1, y_train1)]
+    loss1(x, y) = Flux.Losses.mse(model1(x), y)
+    evalcb1() = @show(loss1(x_train1, y_train1))
 
-    for epoch in 1:2
-        Flux.train!(loss, parameters, data, opt, cb=evalcb)
+    for epoch in 1:5
+        Flux.train!(loss1, parameters1, data1, opt, cb=evalcb1)
     end
 
-    parameters = params(model2)
-    data = [(x_train2, y_train2)]
-    loss(x, y) = Flux.Losses.mse(model2(x), y)
-    evalcb() = @show(loss(x_train2, y_train2))
+    parameters2 = params(model2)
+    data2 = [(x_train2, y_train2)]
+    loss2(x, y) = Flux.Losses.mse(model2(x), y)
+    evalcb2() = @show(loss2(x_train2, y_train2))
 
-    for epoch in 1:2
-        Flux.train!(loss, parameters, data, opt, cb=evalcb)
+    for epoch in 1:5
+        Flux.train!(loss2, parameters2, data2, opt, cb=evalcb2)
+    end
+
+    if i%30 == 0
+        t = (x -> against_random()).(1:100)
+        print(sum(t) / length(t), "\n")
     end
     # open("model/weights.txt", "a+") do io
     #    write(io, string(params(model)))
