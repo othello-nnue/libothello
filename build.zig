@@ -37,16 +37,18 @@ pub fn build(b: *std.build.Builder) void {
         .path = FS{ .path = "engine/main.zig" },
         .dependencies = &.{othello},
     };
-    {
-        const lib = b.addStaticLibrary("othello", "game/ffi.zig");
-        lib.setTarget(target);
-        lib.setBuildMode(mode);
-        lib.addPackage(othello);
-        lib.install();
-    }
+    // {
+    //     const lib = b.addStaticLibrary("othello", "game/ffi.zig");
+    //     lib.setTarget(target);
+    //     lib.setBuildMode(mode);
+    //     lib.addPackage(othello);
+    //     lib.install();
+    // }
     {
         const ver = b.version(0, 0, 0);
         const lib = b.addSharedLibrary("othello", "game/ffi.zig", ver);
+        lib.strip = true;
+        lib.single_threaded = true;
         lib.setTarget(target);
         lib.setBuildMode(std.builtin.Mode.ReleaseFast);
         lib.addPackage(othello);
