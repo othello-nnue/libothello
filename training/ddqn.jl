@@ -2,6 +2,7 @@ include("./othello.jl");
 include("./model.jl");
 using Bits
 using Flux
+using CUDA
 
 nf = 32
 #model1 = Chain(Dense(128, 256, gelu), Dense(256, 64, tanh))
