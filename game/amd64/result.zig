@@ -26,8 +26,8 @@ fn res(i: u3, p: u8, n: u8) u8 {
 //https://github.com/ziglang/zig/issues/11312
 
 extern fn @"llvm.assume"(bool) void;
-fn intCast(T: type, a: anytype) T {
-    b = @intCast(T, a);
+fn intCast(comptime T: type, a: anytype) T {
+    const b = @intCast(T, a);
     if (a != b) unreachable;
     @"llvm.assume"(a == b);
     return b;
