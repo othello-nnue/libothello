@@ -10,12 +10,16 @@ jobs:
       - uses: goto-bus-stop/setup-zig@v1
         with:
           version: master
+      - uses: actions/download-artifact@v3
+        with:
+          name: libothello
+          path: zig-out/lib/libothello.so.0.0.0
       - name: Run Tests
         run: zig build test
       - name: Run Bench
         run: zig build bench
-      - name: Build
-        run : zig build lib
+      # - name: Build
+      #   run : zig build lib
       - name: Check Formatting
         run: zig fmt --check .
       
