@@ -37,17 +37,23 @@ pub fn build(b: *std.build.Builder) void {
         //const run_step = b.step("lib", "Make library");
         {
             const lib = b.addStaticLibrary("othello", "game/ffi.zig");
+            lib.strip = true;
+            lib.single_threaded = true;
             lib.setTarget(target);
             lib.setBuildMode(mode);
             lib.addPackage(othello);
+            lib.addPackage(arch);
             lib.install();
         }
         {
             const ver = b.version(0, 0, 0);
             const lib = b.addSharedLibrary("othello", "game/ffi.zig", ver);
+            lib.strip = true;
+            lib.single_threaded = true;
             lib.setTarget(target);
             lib.setBuildMode(std.builtin.Mode.ReleaseFast);
             lib.addPackage(othello);
+            lib.addPackage(arch);
             lib.install();
         }
     }
