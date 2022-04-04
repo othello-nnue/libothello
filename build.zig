@@ -11,6 +11,9 @@ const bench = Pkg{
     .path = FS{ .path = "zig-bench/bench.zig" },
 };
 
+// var target: std.zig.CrossTarget = undefined;
+// var mode: std.builtin.Mode = undefined;
+
 pub fn build(b: *std.build.Builder) void {
     const target = b.standardTargetOptions(.{});
     const mode = b.standardReleaseOptions();
@@ -33,8 +36,13 @@ pub fn build(b: *std.build.Builder) void {
         .path = FS{ .path = "game/main.zig" },
         .dependencies = &.{ utils, arch },
     };
+    const testing = Pkg{
+        .name = "testing",
+        .path = FS{ .path = "test/perft.zig" },
+        .dependencies = &.{othello},
+    };
     {
-        //const run_step = b.step("lib", "Make library");
+        const lib_step = b.step("lib", "Make library");
         {
             const lib = b.addStaticLibrary("othello", "game/ffi.zig");
             lib.strip = true;
@@ -43,7 +51,8 @@ pub fn build(b: *std.build.Builder) void {
             lib.setBuildMode(mode);
             lib.addPackage(othello);
             lib.addPackage(arch);
-            lib.install();
+            const install = b.addInstallArtifact(lib);
+            lib_step.dependOn(&install.step);
         }
         {
             const ver = b.version(0, 0, 0);
@@ -54,7 +63,8 @@ pub fn build(b: *std.build.Builder) void {
             lib.setBuildMode(std.builtin.Mode.ReleaseFast);
             lib.addPackage(othello);
             lib.addPackage(arch);
-            lib.install();
+            const install = b.addInstallArtifact(lib);
+            lib_step.dependOn(&install.step);
         }
     }
     {
@@ -64,10 +74,6 @@ pub fn build(b: *std.build.Builder) void {
         exe.addPackage(othello);
 
         const run_cmd = exe.run();
-        run_cmd.step.dependOn(b.getInstallStep());
-        if (b.args) |args| {
-            run_cmd.addArgs(args);
-        }
 
         const run_step = b.step("tui", "Run TUI app");
         run_step.dependOn(&run_cmd.step);
@@ -80,42 +86,17 @@ pub fn build(b: *std.build.Builder) void {
         exe.addPackage(bench);
 
         const run_cmd = exe.run();
-        run_cmd.step.dependOn(b.getInstallStep());
 
         const run_step = b.step("bench", "Run benchmark tests");
         run_step.dependOn(&run_cmd.step);
     }
-    {
-        const exe = b.addExecutable("perf", "test/print.zig");
-        exe.setTarget(target);
-        exe.setBuildMode(std.builtin.Mode.ReleaseFast);
-        exe.addPackage(othello);
-
-        const run_cmd = exe.run();
-        run_cmd.step.dependOn(b.getInstallStep());
-
-        const run_step = b.step("perft", "Print perft results");
-        run_step.dependOn(&run_cmd.step);
-    }
     const test_step = b.step("test", "Run library tests");
-    if (native_isa == .x86_64) {
-        var tests = b.addTest("utils/main.zig");
-        tests.setTarget(target);
-        tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
-        test_step.dependOn(&tests.step);
-    }
-    if (native_isa == .x86_64) {
-        var tests = b.addTest("amd64/test.zig");
-        tests.setTarget(target);
-        tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
-        tests.addPackage(utils);
-        test_step.dependOn(&tests.step);
-    }
-    {
-        var tests = b.addTest("test/test.zig");
-        //tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
+    for ([_]Pkg{ utils, arch, othello, testing }) |module| {
+        var tests = b.addTestSource(module.path);
         tests.setBuildMode(mode);
-        tests.addPackage(othello);
+        if (module.dependencies) |deps|
+            for (deps) |dep|
+                tests.addPackage(dep);
         test_step.dependOn(&tests.step);
     }
 }

@@ -18,8 +18,8 @@ jobs:
         run: zig build test
       - name: Run Bench
         run: zig build bench
-      # - name: Build
-      #   run : zig build lib
+      - name: Build
+        run : zig build lib
       - name: Check Formatting
         run: zig fmt --check .
       

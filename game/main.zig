@@ -98,3 +98,21 @@ fn unflippable(a: u64, b: u64) u64 {
 pub fn stable(self: Self) u64 {
     return unflippable(self.board[0], self.board[1]) | unflippable(self.board[1], self.board[0]);
 }
+
+const expect = @import("std").testing.expect;
+test "init test" {
+    const i = Self{};
+    const j = i.moves();
+    try expect(j == 0x0000_1020_0408_0000);
+}
+
+test "size test" {
+    try expect(@sizeOf(Self) == 16);
+}
+
+// https://github.com/ziglang/zig/issues/3696
+test "assign test" {
+    var g = Self{};
+    g = g.pass();
+    try expect(g.board[0] != g.board[1]);
+}

@@ -1,7 +1,7 @@
 const Game = @import("othello");
-const testing = @import("std").testing;
-const expect = testing.expect;
-const expectEqual = testing.expectEqual;
+const std = @import("std");
+const panic = std.debug.panic;
+const expectEqual = std.testing.expectEqual;
 
 pub fn perft(board: Game, depth: usize) u64 {
     if (depth == 0) return 1;
@@ -13,14 +13,15 @@ pub fn perft(board: Game, depth: usize) u64 {
     while (moves != 0) {
         const i = @intCast(u6, @ctz(u64, moves));
 
-        moves ^= @as(u64, 1) << i;
+        moves &= moves - 1;
         sum += perft(board.move(i).?, depth - 1);
     }
     return sum;
 }
 
-fn check(board: Game, depth: usize) bool {
-    if (depth == 0) return false;
+//should change to property testing
+fn check(board: Game, depth: usize) void {
+    if (depth == 0) return;
     var moves = board.moves();
 
     var i: u6 = 0;
@@ -31,29 +32,12 @@ fn check(board: Game, depth: usize) bool {
     }) {
         if ((board.board[0] | board.board[1]) & j != 0) continue;
         const t = board.move(i);
-
-        if ((t == null) != (moves & j == 0)) return true;
-        if (t == null) continue;
-        if (check(t.?, depth - 1)) return true;
+        if ((t == null) != (moves & j == 0))
+            panic("{} {} {}\n", .{ board, t, i });
+        if (t) |u|
+            check(u, depth - 1);
     }
-    return check(board.pass(), depth - 1);
-}
-
-test "init test" {
-    const i = Game{};
-    const j = i.moves();
-    try expect(j == 0x0000_1020_0408_0000);
-}
-
-test "size test" {
-    try expect(@sizeOf(Game) == 16);
-}
-
-// https://github.com/ziglang/zig/issues/3696
-test "assign test" {
-    var g = Game{};
-    g = g.pass();
-    try expect(g.board[0] != g.board[1]);
+    check(board.pass(), depth - 1);
 }
 
 test "perft test" {
@@ -62,7 +46,7 @@ test "perft test" {
 }
 
 test "check test" {
-    try expect(!check(.{}, 11));
+    check(.{}, 11);
 }
 
 //https://www.aartbik.com/strategy.php
@@ -72,14 +56,14 @@ const known_perft = .{
     12,
     56,
     244,
-    1396,
-    8200,
-    55092,
-    390216,
-    3005288,
-    24571284,
-    212258800,
-    1939886636,
-    18429641748,
-    184042084512,
+    // 1396,
+    // 8200,
+    // 55092,
+    // 390216,
+    // 3005288,
+    // 24571284,
+    // 212258800,
+    // 1939886636,
+    // 18429641748,
+    // 184042084512,
 };

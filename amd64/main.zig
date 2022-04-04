@@ -14,3 +14,7 @@ pub fn flip(board: [2]u64, place: u6) u64 {
         ], MASK[place][i][1]);
     return ret;
 }
+
+test {
+    _ = @import("test.zig");
+}
