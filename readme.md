@@ -4,14 +4,11 @@ This is [Zig](ziglang.org) port of [Othello move generator](https://gitlab.com/r
 # Directory structure
 
     .
-    ├── engine      # Engine code
+    ├── amd64       # AMD64-specific codes
+    ├── arm64       # ARM64-specific codes
+    ├── utils       # Utility functions
     ├── game        # Othello implementation
-    │   ├── amd64   # AMD64-specific codes
-    │   └── arm64   # ARM64-specific codes
-    ├── game        # Othello implementation
-    ├── perf        # Benchmark tests
-    ├── training    # NNUE training 
-    ├── tui         # Othello on terminal
+    ├── test        # Behavior tests and benchmarks
     ├── build.zig   # build file
     └── readme.md
 

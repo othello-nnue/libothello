@@ -4,7 +4,7 @@ const FS = std.build.FileSource;
 
 const utils = Pkg{
     .name = "utils",
-    .path = FS{ .path = "game/utils.zig" },
+    .path = FS{ .path = "utils/main.zig" },
 };
 const bench = Pkg{
     .name = "bench",
@@ -14,14 +14,15 @@ const bench = Pkg{
 pub fn build(b: *std.build.Builder) void {
     const target = b.standardTargetOptions(.{});
     const mode = b.standardReleaseOptions();
-    const isa = target.cpu_arch orelse @import("builtin").target.cpu.arch;
+    const native_isa = @import("builtin").target.cpu.arch;
+    const isa = target.cpu_arch orelse native_isa;
 
     const arch = Pkg{
         .name = "arch",
         .path = FS{
             .path = switch (isa) {
-                .aarch64 => "game/arm64/main.zig",
-                .x86_64 => "game/amd64/main.zig",
+                .aarch64 => "arm64/main.zig",
+                .x86_64 => "amd64/main.zig",
                 else => unreachable,
             },
         },
@@ -33,27 +34,28 @@ pub fn build(b: *std.build.Builder) void {
         .dependencies = &.{ utils, arch },
     };
     {
-        const lib = b.addStaticLibrary("othello", "game/ffi.zig");
-        lib.setTarget(target);
-        lib.setBuildMode(mode);
-        lib.addPackage(othello);
-        lib.install();
-    }
-    {
-        const ver = b.version(0, 0, 0);
-        const lib = b.addSharedLibrary("othello", "game/ffi.zig", ver);
-        lib.setTarget(target);
-        lib.setBuildMode(std.builtin.Mode.ReleaseFast);
-        lib.addPackage(othello);
-        lib.install();
+        //const run_step = b.step("lib", "Make library");
+        {
+            const lib = b.addStaticLibrary("othello", "game/ffi.zig");
+            lib.setTarget(target);
+            lib.setBuildMode(mode);
+            lib.addPackage(othello);
+            lib.install();
+        }
+        {
+            const ver = b.version(0, 0, 0);
+            const lib = b.addSharedLibrary("othello", "game/ffi.zig", ver);
+            lib.setTarget(target);
+            lib.setBuildMode(std.builtin.Mode.ReleaseFast);
+            lib.addPackage(othello);
+            lib.install();
+        }
     }
     {
         const exe = b.addExecutable("tui", "test/tui.zig");
         exe.setTarget(target);
         exe.setBuildMode(mode);
         exe.addPackage(othello);
-        exe.addPackage(engine);
-        exe.install();
 
         const run_cmd = exe.run();
         run_cmd.step.dependOn(b.getInstallStep());
@@ -61,7 +63,7 @@ pub fn build(b: *std.build.Builder) void {
             run_cmd.addArgs(args);
         }
 
-        const run_step = b.step("run", "Run TUI app");
+        const run_step = b.step("tui", "Run TUI app");
         run_step.dependOn(&run_cmd.step);
     }
     {
@@ -90,14 +92,14 @@ pub fn build(b: *std.build.Builder) void {
         run_step.dependOn(&run_cmd.step);
     }
     const test_step = b.step("test", "Run library tests");
-    if (isa == .x86_64) {
-        var tests = b.addTest("game/utils.zig");
+    if (native_isa == .x86_64) {
+        var tests = b.addTest("utils/main.zig");
         tests.setTarget(target);
         tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
         test_step.dependOn(&tests.step);
     }
-    if (isa == .x86_64) {
-        var tests = b.addTest("game/amd64/test.zig");
+    if (native_isa == .x86_64) {
+        var tests = b.addTest("amd64/test.zig");
         tests.setTarget(target);
         tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
         tests.addPackage(utils);
@@ -105,7 +107,6 @@ pub fn build(b: *std.build.Builder) void {
     }
     {
         var tests = b.addTest("test/test.zig");
-        tests.setTarget(target);
         //tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
         tests.setBuildMode(mode);
         tests.addPackage(othello);
