@@ -1,5 +1,5 @@
 const bench = @import("bench");
-const tests = @import("./test.zig");
+const tests = @import("perft");
 
 pub fn main() anyerror!void {
     try bench.benchmark(struct {

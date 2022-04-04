@@ -37,7 +37,7 @@ pub fn build(b: *std.build.Builder) void {
         .dependencies = &.{ utils, arch },
     };
     const testing = Pkg{
-        .name = "testing",
+        .name = "perft",
         .path = FS{ .path = "test/perft.zig" },
         .dependencies = &.{othello},
     };
@@ -84,6 +84,7 @@ pub fn build(b: *std.build.Builder) void {
         exe.setBuildMode(std.builtin.Mode.ReleaseFast);
         exe.addPackage(othello);
         exe.addPackage(bench);
+        exe.addPackage(testing);
 
         const run_cmd = exe.run();
 
