@@ -32,11 +32,6 @@ pub fn build(b: *std.build.Builder) void {
         .path = FS{ .path = "game/main.zig" },
         .dependencies = &.{ utils, arch },
     };
-    const engine = Pkg{
-        .name = "engine",
-        .path = FS{ .path = "engine/main.zig" },
-        .dependencies = &.{othello},
-    };
     {
         const lib = b.addStaticLibrary("othello", "game/ffi.zig");
         lib.setTarget(target);
@@ -53,7 +48,7 @@ pub fn build(b: *std.build.Builder) void {
         lib.install();
     }
     {
-        const exe = b.addExecutable("tui", "tui/main.zig");
+        const exe = b.addExecutable("tui", "test/tui.zig");
         exe.setTarget(target);
         exe.setBuildMode(mode);
         exe.addPackage(othello);
@@ -70,41 +65,7 @@ pub fn build(b: *std.build.Builder) void {
         run_step.dependOn(&run_cmd.step);
     }
     {
-        const exe = b.addExecutable("elo", "perf/elo.zig");
-        exe.setTarget(target);
-        exe.setBuildMode(mode);
-        exe.addPackage(othello);
-        exe.addPackage(engine);
-        exe.install();
-
-        const run_cmd = exe.run();
-        run_cmd.step.dependOn(b.getInstallStep());
-        if (b.args) |args| {
-            run_cmd.addArgs(args);
-        }
-
-        const run_step = b.step("elo", "Run regression tests");
-        run_step.dependOn(&run_cmd.step);
-    }
-    {
-        const exe = b.addExecutable("stability", "perf/stability.zig");
-        exe.setTarget(target);
-        exe.setBuildMode(mode);
-        exe.addPackage(othello);
-        exe.addPackage(engine);
-        exe.install();
-
-        const run_cmd = exe.run();
-        run_cmd.step.dependOn(b.getInstallStep());
-        if (b.args) |args| {
-            run_cmd.addArgs(args);
-        }
-
-        const run_step = b.step("stability", "Run stability tests");
-        run_step.dependOn(&run_cmd.step);
-    }
-    {
-        const exe = b.addExecutable("perf", "perf/bench.zig");
+        const exe = b.addExecutable("perf", "test/bench.zig");
         exe.setTarget(target);
         exe.setBuildMode(std.builtin.Mode.ReleaseFast);
         exe.addPackage(othello);
@@ -117,7 +78,7 @@ pub fn build(b: *std.build.Builder) void {
         run_step.dependOn(&run_cmd.step);
     }
     {
-        const exe = b.addExecutable("perf", "perf/print.zig");
+        const exe = b.addExecutable("perf", "test/print.zig");
         exe.setTarget(target);
         exe.setBuildMode(std.builtin.Mode.ReleaseFast);
         exe.addPackage(othello);
@@ -143,7 +104,7 @@ pub fn build(b: *std.build.Builder) void {
         test_step.dependOn(&tests.step);
     }
     {
-        var tests = b.addTest("perf/test.zig");
+        var tests = b.addTest("test/test.zig");
         tests.setTarget(target);
         //tests.setBuildMode(std.builtin.Mode.ReleaseSafe);
         tests.setBuildMode(mode);

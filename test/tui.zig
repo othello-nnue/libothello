@@ -1,6 +1,5 @@
 const std = @import("std");
 const Game = @import("othello");
-const engine = @import("engine");
 
 const os = std.os.linux;
 const stdin = std.io.getStdIn();
@@ -11,7 +10,6 @@ var y: u3 = 0;
 var z: u1 = 0;
 
 var game = Game{};
-const eng = engine.ab{ .depth = 8, .eval = engine.evals.good };
 
 pub fn main() anyerror!void {
     const original_termios = rawmode();
@@ -26,14 +24,6 @@ pub fn main() anyerror!void {
         if (game.moves() == 0) {
             game = game.pass();
             z ^= 1;
-        }
-        if (z == 1) {
-            const move = eng.move(game);
-            std.debug.print("{}\t", .{move});
-            game = game.move(move).?;
-            z ^= 1;
-            try render();
-            continue;
         }
         try render();
         _ = try stdin.read(&buff);
