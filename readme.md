@@ -31,8 +31,3 @@ On ARM processors we implement [Hyperbola Quintessence](https://www.chessprogram
 Name | Type | Size
 ----:|----:|----:
 `mask`|`[64][4]u64`|2KiB
-
-# Evaluation
-
-## AlphaZero
-We train an [improved](https://arxiv.org/abs/2007.12509) version of AlphaZero, which generates game for NNUE training data. 
