@@ -1,7 +1,7 @@
-const mul = @import("./utils.zig").mul;
-fn deltaswap(x: u64, shift: u6, mask: u64) u64 {
-    const y = (x ^ (x >> shift)) & mask;
-    return x ^ y ^ @shlExact(y, shift);
+const mul = @import("utils").mul;
+fn deltaswap(bits: u64, shift: u6, mask: u64) u64 {
+    const delta = (bits ^ (bits >> shift)) & mask;
+    return bits ^ delta ^ @shlExact(delta, shift);
 }
 
 fn vert(x: u64) u64 {
@@ -9,7 +9,12 @@ fn vert(x: u64) u64 {
 }
 
 fn hori(x: u64) u64 {
-    return @byteSwap(u64, @bitReverse(u64, x));
+    //return @byteSwap(u64, @bitReverse(u64, x));
+    return @bitReverse(u64, @byteSwap(u64, x));
+}
+
+fn rot(x: u64) u64 {
+    return @bitReverse(u64, x);
 }
 
 fn diag(x: u64) u64 {
@@ -24,16 +29,25 @@ fn gaid(x: u64) u64 {
     return deltaswap(y, 36, mul(0x0f, 0x0f));
 }
 
-fn rot(x: u64) u64 {
-    return @bitReverse(u64, x);
-}
-
 fn rot1(x: u64) u64 {
     return vert(diag(x));
 }
 
 fn rot3(x: u64) u64 {
     return vert(gaid(x));
+}
+
+// optimized for AMD64
+// should use avx512 later?
+fn tot(x: u64) [8]u64 {
+    //does not work(yet)
+    //return half(x) ++ half(vert(x));
+    return .{ x, hori(x), vert(x), hori(vert(x)), diag(x), gaid(x), diag(vert(x)), gaid(vert(x)) };
+}
+
+// optimized for ARM64
+fn tot2(x: u64) [8]u64 {
+    return .{ x, vert(x), rot(x), hori(x), diag(x), diag(vert(x)), diag(rot(x)), diag(hori(x)) };
 }
 
 fn testbit(comptime t: fn (u6) u6, comptime u: fn (u64) u64) bool {
