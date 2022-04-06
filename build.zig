@@ -48,9 +48,9 @@ pub fn build(b: *std.build.Builder) void {
             lib.strip = true;
             lib.single_threaded = true;
             lib.setTarget(target);
-            lib.setBuildMode(mode);
+            lib.setBuildMode(std.builtin.Mode.ReleaseFast);
             lib.addPackage(othello);
-            lib.addPackage(arch);
+            lib.addPackage(utils);
             const install = b.addInstallArtifact(lib);
             lib_step.dependOn(&install.step);
         }
@@ -62,7 +62,7 @@ pub fn build(b: *std.build.Builder) void {
             lib.setTarget(target);
             lib.setBuildMode(std.builtin.Mode.ReleaseFast);
             lib.addPackage(othello);
-            lib.addPackage(arch);
+            lib.addPackage(utils);
             const install = b.addInstallArtifact(lib);
             lib_step.dependOn(&install.step);
         }
