@@ -1,7 +1,7 @@
 const MASK = @import("./mask.zig").MASK;
 const mul = @import("utils").mul;
 
-fn flip_positive(board: [2]u64, place: u6) u64 {
+fn flip_positive_scalar(board: [2]u64, place: u6) u64 {
     var ret: u64 = 0;
     const t = @as(u64, 1) << place;
     for (MASK[place]) |m, i| {
@@ -18,7 +18,7 @@ fn flip_positive(board: [2]u64, place: u6) u64 {
     return ret;
 }
 
-fn flip_positive2(board: [2]u64, place: u6) u64 {
+fn flip_positive(board: [2]u64, place: u6) u64 {
     var ret: u64 = 0;
     const t = @as(u64, 1) << place;
     const m: @Vector(u64, 4) = MASK[place];
