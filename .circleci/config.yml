@@ -1,0 +1,24 @@
+version: 2.1
+
+jobs:
+  test:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
+    steps:
+      - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
+      - run: sudo apt install jq
+      - run: |
+        URL=$(wget -O - https://ziglang.org/download/index.json | jq -r '.master."'$(arch)'-linux".tarball' 2>&1)
+        wget $URL
+        tar xf $(basename $URL) -C "$HOME"
+        export PATH=$PATH:$HOME/$(basename -s .tar.xz $URL)
+        zig build test
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
