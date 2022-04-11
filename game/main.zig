@@ -42,20 +42,14 @@ pub fn moves_avx512(self: Self) u64 {
 
     var x = @splat(8, self.board[0]);
     var y = @splat(8, self.board[1]) & m;
+    const z = rot(y, s);
 
-    // inline for (.{ s, s *% t, s *% t *% t }) |d| {
-    //     x |= y & rot(x, d);
-    //     y &= rot(y, d);
-    // }
-    // x &= @splat(8, self.board[1]);
-    
-    x = y & rot(x, s);
     x |= y & rot(x, s);
-    y &= rot(y, s);
+    y &= z;
     x |= y & rot(x, s *% t);
     x |= y & rot(x, s *% t);
-
-    x = rot(x, s);
+    x = z & rot(x, s *% t);
+    
     return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
     //return 0;
 }
@@ -71,7 +65,8 @@ const has_avx512: bool = init: {
 pub fn moves(self: Self) u64 {
     assert(self.board[0] & self.board[1] == 0);
     //return if (has_avx512) moves_avx512(self) else moves_default(self);
-    return moves_default(self);
+    //return moves_default(self);
+    return moves_avx512(self);
 }
 
 /// Returns the set of stones that would be flipped.
