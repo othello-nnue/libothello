@@ -13,11 +13,18 @@ pub fn moves_default(self: Self) u64 {
     var x = @splat(4, self.board[0]);
     var y = @splat(4, self.board[1]) & m;
 
-    inline for (.{ s, s * t, s * t * t }) |d| {
-        x |= (y & x << d) | (y >> (d - s) & x >> d);
-        y &= y << d;
-    }
-    x &= @splat(4, self.board[1]);
+    // inline for (.{ s, s * t, s * t * t }) |d| {
+    //     x |= (y & x << d) | (y >> (d - s) & x >> d);
+    //     y &= y << d;
+    // }
+    // x &= @splat(4, self.board[1]);
+
+    x = y & ((x << s) | (x >> s));
+    x |= y & ((x << s) | (x >> s));
+    y &= y << s;
+    x |= (y & x << (s * t)) | ((y >> s) & x >> (s * t));
+    x |= (y & x << (s * t)) | ((y >> s) & x >> (s * t));
+
     x = (x << s) | (x >> s);
     return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
 }
@@ -36,13 +43,21 @@ pub fn moves_avx512(self: Self) u64 {
     var x = @splat(8, self.board[0]);
     var y = @splat(8, self.board[1]) & m;
 
-    inline for (.{ s, s *% t, s *% t *% t }) |d| {
-        x |= y & rot(x, d);
-        y &= rot(y, d);
-    }
-    x &= @splat(8, self.board[1]);
+    // inline for (.{ s, s *% t, s *% t *% t }) |d| {
+    //     x |= y & rot(x, d);
+    //     y &= rot(y, d);
+    // }
+    // x &= @splat(8, self.board[1]);
+    
+    x = y & rot(x, s);
+    x |= y & rot(x, s);
+    y &= rot(y, s);
+    x |= y & rot(x, s *% t);
+    x |= y & rot(x, s *% t);
+
     x = rot(x, s);
     return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
+    //return 0;
 }
 
 const has_avx512: bool = init: {
@@ -55,7 +70,8 @@ const has_avx512: bool = init: {
 /// Returns the set of legal moves.
 pub fn moves(self: Self) u64 {
     assert(self.board[0] & self.board[1] == 0);
-    return if (has_avx512) moves_avx512(self) else moves_default(self);
+    //return if (has_avx512) moves_avx512(self) else moves_default(self);
+    return moves_default(self);
 }
 
 /// Returns the set of stones that would be flipped.
