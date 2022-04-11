@@ -4,8 +4,8 @@ const mul = @import("utils").mul;
 
 board: [2]u64 = .{ 0x0000_0008_1000_0000, 0x0000_0010_0800_0000 },
 
-/// Returns the set of legal moves. 
-pub fn moves(self: Self) u64 {
+/// Returns the set of legal moves.
+pub fn moves2(self: Self) u64 {
     assert(self.board[0] & self.board[1] == 0);
     const s = @Vector(4, u6){ 1, 7, 8, 9 };
     const t = @splat(4, @as(u6, 2));
@@ -23,14 +23,38 @@ pub fn moves(self: Self) u64 {
     return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
 }
 
-/// Returns the set of stones that would be flipped.  
+fn rot(a: @Vector(8, u64), b: @Vector(8, u6)) @Vector(8, u64) {
+    return (a << b) | (a >> (-%b));
+}
+
+/// Returns the set of legal moves.
+/// AVX-512 optimized
+pub fn moves(self: Self) u64 {
+    assert(self.board[0] & self.board[1] == 0);
+    const s = @Vector(8, u6){ 1, 7, 8, 9, 63, 57, 56, 55 };
+    const t = @splat(8, @as(u6, 2));
+    const m = @Vector(8, u64){ mul(0xFF, 0x7E), mul(0x7E, 0x7E), mul(0x7E, 0xFF), mul(0x7E, 0x7E), mul(0xFF, 0x7E), mul(0x7E, 0x7E), mul(0x7E, 0xFF), mul(0x7E, 0x7E) };
+
+    var x = @splat(8, self.board[0]);
+    var y = @splat(8, self.board[1]) & m;
+
+    inline for (.{ s, s *% t, s *% t *% t }) |d| {
+        x |= y & rot(x, d);
+        y &= rot(y, d);
+    }
+    x &= @splat(8, self.board[1]);
+    x = rot(x, s);
+    return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
+}
+
+/// Returns the set of stones that would be flipped.
 pub fn flip(self: Self, place: u6) u64 {
     assert(self.board[0] & self.board[1] == 0);
     return @import("arch").flip(self.board, place);
 }
 
 // https://github.com/ziglang/zig/issues/3696
-/// Returns the state after move. 
+/// Returns the state after move.
 pub fn move(self: Self, place: u6) ?Self {
     assert(self.board[0] & self.board[1] == 0);
     if (@as(u64, 1) << place & (self.board[0] | self.board[1]) != 0) return null;
@@ -41,14 +65,14 @@ pub fn move(self: Self, place: u6) ?Self {
 }
 
 // https://github.com/ziglang/zig/issues/3696
-/// Returns the state after pass. 
+/// Returns the state after pass.
 pub fn pass(self: Self) Self {
     assert(self.board[0] & self.board[1] == 0);
     const temp = Self{ .board = .{ self.board[1], self.board[0] } };
     return temp;
 }
 
-/// Returns if the game ended. 
+/// Returns if the game ended.
 /// Whether neither player can move.
 pub fn end(self: Self) bool {
     assert(self.board[0] & self.board[1] == 0);
@@ -56,13 +80,13 @@ pub fn end(self: Self) bool {
 }
 
 // actually i7 is enough
-/// Returns final score. 
+/// Returns final score.
 pub fn score(self: Self) i8 {
     assert(self.board[0] & self.board[1] == 0);
     return @as(i8, @popCount(u64, self.board[0])) - 32;
 }
 
-/// Returns move number. 
+/// Returns move number.
 pub fn movenum(self: Self) u6 {
     assert(self.board[0] & self.board[1] == 0);
     return @popCount(u64, self.board[0] | self.board[1]);
