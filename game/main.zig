@@ -5,8 +5,7 @@ const mul = @import("utils").mul;
 board: [2]u64 = .{ 0x0000_0008_1000_0000, 0x0000_0010_0800_0000 },
 
 /// Returns the set of legal moves.
-pub fn moves2(self: Self) u64 {
-    assert(self.board[0] & self.board[1] == 0);
+pub fn moves_default(self: Self) u64 {
     const s = @Vector(4, u6){ 1, 7, 8, 9 };
     const t = @splat(4, @as(u6, 2));
     const m = @Vector(4, u64){ mul(0xFF, 0x7E), mul(0xFF, 0x7E), mul(0xFF, 0xFF), mul(0xFF, 0x7E) };
@@ -29,8 +28,7 @@ fn rot(a: @Vector(8, u64), b: @Vector(8, u6)) @Vector(8, u64) {
 
 /// Returns the set of legal moves.
 /// AVX-512 optimized
-pub fn moves(self: Self) u64 {
-    assert(self.board[0] & self.board[1] == 0);
+pub fn moves_avx512(self: Self) u64 {
     const s = @Vector(8, u6){ 1, 7, 8, 9, 63, 57, 56, 55 };
     const t = @splat(8, @as(u6, 2));
     const m = @Vector(8, u64){ mul(0xFF, 0x7E), mul(0x7E, 0x7E), mul(0x7E, 0xFF), mul(0x7E, 0x7E), mul(0xFF, 0x7E), mul(0x7E, 0x7E), mul(0x7E, 0xFF), mul(0x7E, 0x7E) };
@@ -45,6 +43,19 @@ pub fn moves(self: Self) u64 {
     x &= @splat(8, self.board[1]);
     x = rot(x, s);
     return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
+}
+
+const has_avx512: bool = init: {
+    const isa = @import("builtin").target.cpu;
+    const features = isa.model.*.features;
+    const avx512 = @import("std").Target.x86.cpu.x86_64_v4.features;
+    break :init features.isSuperSetOf(avx512);
+};
+
+/// Returns the set of legal moves.
+pub fn moves(self: Self) u64 {
+    assert(self.board[0] & self.board[1] == 0);
+    return if (has_avx512) moves_avx512(self) else moves_default(self);
 }
 
 /// Returns the set of stones that would be flipped.
