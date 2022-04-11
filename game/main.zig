@@ -29,6 +29,26 @@ pub fn moves(self: Self) u64 {
     return ret & ~self.board[0] & ~self.board[1];
 }
 
+/// Returns the set of legal moves. 
+/// vectorize better
+pub fn moves2(self: Self) u64 {
+    assert(self.board[0] & self.board[1] == 0);
+    const s = @Vector(4, u6){ 1, 7, 8, 9 };
+    const t = @splat(4, @as(u3, 2));
+    const m = @Vector(4, u64){ mul(0xFF, 0x7E), mul(0xFF, 0x7E), mul(0xFF, 0xFF), mul(0xFF, 0x7E) };
+
+    var x = @splat(4, self.board[0]);
+    var y = @splat(4, self.board[1]) & m;
+    
+    inline for (.{ s, s * t, s * t * t }) |d| {
+        x |= (y & x << d) | (y >> (d - s) & x >> d);
+        y &= y << d;
+    }
+    x &= @splat(4, self.board[1]);
+    x = (x << s) | (x >> s);
+    return @reduce(.BitOr, x) & ~self.board[0] & ~self.board[1];
+}
+
 /// Returns the set of stones that would be flipped.  
 pub fn flip(self: Self, place: u6) u64 {
     assert(self.board[0] & self.board[1] == 0);
