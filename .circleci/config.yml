@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  jq: circleci/jq@2.2.0
 
 jobs:
   test:
@@ -7,15 +9,15 @@ jobs:
     resource_class: arm.medium
     steps:
       - checkout
+      - jq/install
       - run: git submodule sync
       - run: git submodule update --init
-      - run: sudo apt install jq
       - run: |
-        URL=$(wget -O - https://ziglang.org/download/index.json | jq -r '.master."'$(arch)'-linux".tarball' 2>&1)
-        wget $URL
-        tar xf $(basename $URL) -C "$HOME"
-        export PATH=$PATH:$HOME/$(basename -s .tar.xz $URL)
-        zig build test
+          URL=$(wget -O - https://ziglang.org/download/index.json | jq -r '.master."'$(arch)'-linux".tarball' 2>&1)
+          wget $URL
+          tar xf $(basename $URL) -C "$HOME"
+          export PATH=$PATH:$HOME/$(basename -s .tar.xz $URL)
+          zig build test
 
 workflows:
   version: 2

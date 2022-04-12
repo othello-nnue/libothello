@@ -13,12 +13,6 @@ pub fn moves_default(self: Self) u64 {
     var x = @splat(4, self.board[0]);
     var y = @splat(4, self.board[1]) & m;
 
-    // inline for (.{ s, s * t, s * t * t }) |d| {
-    //     x |= (y & x << d) | (y >> (d - s) & x >> d);
-    //     y &= y << d;
-    // }
-    // x &= @splat(4, self.board[1]);
-
     x = y & ((x << s) | (x >> s));
     x |= y & ((x << s) | (x >> s));
     y &= y << s;
@@ -49,16 +43,19 @@ pub fn moves_avx512(self: Self) u64 {
     x |= y & rot(x, s *% t);
     x |= y & rot(x, s *% t);
     x = z & rot(x, s *% t);
-    
+
     return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
     //return 0;
 }
 
 const has_avx512: bool = init: {
     const isa = @import("builtin").target.cpu;
+    //@compileLog(isa.model);
     const features = isa.model.*.features;
-    const avx512 = @import("std").Target.x86.cpu.x86_64_v4.features;
-    break :init features.isSuperSetOf(avx512);
+    //const avx512 = @import("std").Target.x86.cpu.x86_64_v4.features;
+    const has = @import("std").Target.x86.featureSetHas(features, .avx2);
+    //@compileLog(@enumToInt(@import("std").Target.x86.Feature.avx2));
+    break :init has;
 };
 
 /// Returns the set of legal moves.
