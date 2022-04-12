@@ -18,6 +18,7 @@ jobs:
           tar xf $(basename $URL) -C "$HOME"
           export PATH=$PATH:$HOME/$(basename -s .tar.xz $URL)
           zig build test
+          zig build bench
 
 workflows:
   version: 2

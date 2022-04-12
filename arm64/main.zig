@@ -19,19 +19,20 @@ fn flip_positive_scalar(board: [2]u64, place: u6) u64 {
 }
 
 fn flip_positive(board: [2]u64, place: u6) u64 {
-    var ret: u64 = 0;
     const t = @as(u64, 1) << place;
-    const m: @Vector(u64, 4) = MASK[place];
-    const n: @Vector(u64, 4) = .{
+    const m: @Vector(4, u64) = MASK[place];
+    const n: @Vector(4, u64) = .{
         mul(0xFF, 0x7E),
         mul(0x7E, 0xFF),
         mul(0x7E, 0x7E),
         mul(0x7E, 0x7E),
     };
-    const o = (@splat(4, board[0]) & m) >> 1;
+    const one = @splat(4, @as(u6, 1));
+    const zero = @splat(4, @as(u64, 0));
+    const o = (@splat(4, board[0]) & m) >> one;
     const u = (o ^ (o -% @splat(4, t))) & m;
     const v = u & @splat(4, board[1]) & n;
-    const w = @select(u64, u == v, u, @splat(4, @as(u64, 0)));
+    const w = @select(u64, u == v, u, zero);
     return @reduce(.Or, w);
 }
 
