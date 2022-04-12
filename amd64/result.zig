@@ -35,11 +35,11 @@ fn intCast(comptime T: type, a: anytype) T {
 
 pub fn result() [0x3000]u8 {
     var ret: [0x3000]u8 = undefined;
-    const HELPER = @import("./index.zig").HELPER;
+    const HELPER = @import("index.zig").HELPER;
 
     for (HELPER) |i, index| {
         const ind = intCast(u3, index);
-        const mask = @import("./mask.zig").MASK[ind][0];
+        const mask = @import("mask.zig").MASK[ind][0];
         const range: u7 = switch (ind) {
             0, 7 => 64,
             2...5 => 32,

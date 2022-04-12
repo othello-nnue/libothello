@@ -388,12 +388,12 @@ pub const known = [0x3000]u8{
 const testing = @import("std").testing;
 
 test "result test" {
-    const res = @import("./result.zig").result();
+    const res = @import("result.zig").result();
     try testing.expectEqualSlices(u8, &res, &known);
 }
 
 test "range test" {
-    const MASK = @import("./mask.zig").MASK;
+    const MASK = @import("mask.zig").MASK;
     for (MASK) |i|
         for (i) |j|
             for (j) |k|

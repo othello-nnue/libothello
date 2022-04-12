@@ -1,4 +1,4 @@
-const MASK = @import("./mask.zig").MASK;
+const MASK = @import("mask.zig").MASK;
 const mul = @import("utils").mul;
 
 fn flip_positive_scalar(board: [2]u64, place: u6) u64 {

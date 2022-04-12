@@ -1,9 +1,9 @@
-const pdep = @import("utils").pdep;
-const pext = @import("utils").pext;
+const pdep = @import("intrinsic.zig").pdep;
+const pext = @import("intrinsic.zig").pext;
 
-const MASK = @import("./mask.zig").MASK;
-const INDEX = @import("./index.zig").INDEX;
-const RESULT = @import("./test.zig").known;
+const MASK = @import("mask.zig").MASK;
+const INDEX = @import("index.zig").INDEX;
+const RESULT = @import("test.zig").known;
 
 pub fn flip(board: [2]u64, place: u6) u64 {
     var ret: u64 = 0;
