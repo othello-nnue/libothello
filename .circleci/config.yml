@@ -12,14 +12,13 @@ jobs:
       - jq/install
       - run: git submodule sync
       - run: git submodule update --init
-      - run: |
-          lscpu
-          zig targets | jq .native
+      - run: lscpu
       - run: |
           URL=$(wget -O - https://ziglang.org/download/index.json | jq -r '.master."'$(arch)'-linux".tarball' 2>&1)
           wget $URL
           tar xf $(basename $URL) -C "$HOME"
           export PATH=$PATH:$HOME/$(basename -s .tar.xz $URL)
+          zig targets | jq .native
           zig build test -Dcpu=native
           zig build bench -Dcpu=native
 
