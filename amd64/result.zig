@@ -1,5 +1,6 @@
 const pdep = @import("intrinsic.zig").pdep;
 const pext = @import("intrinsic.zig").pext;
+const assume = @import("intrinsic.zig").assume;
 
 fn res(i: u3, p: u8, n: u8) u8 {
     if (p & n != 0)
@@ -24,12 +25,9 @@ fn res(i: u3, p: u8, n: u8) u8 {
 }
 
 //https://github.com/ziglang/zig/issues/11312
-
-extern fn @"llvm.assume"(bool) void;
 fn intCast(comptime T: type, a: anytype) T {
     const b = @intCast(T, a);
-    if (a != b) unreachable;
-    @"llvm.assume"(a == b);
+    assume(a == b);
     return b;
 }
 

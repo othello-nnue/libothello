@@ -5,7 +5,7 @@ pub const INDEX = @import("utils").make_array([4]u16, index);
 fn index(pos: u6) [4]u16 {
     const a = @truncate(u3, pos);
     const b = @truncate(u3, pos >> 3);
-    return [4]u16{
+    return .{
         HELPER[a],
         HELPER[b],
         HELPER[min(a, b)],

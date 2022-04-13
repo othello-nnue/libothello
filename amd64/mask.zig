@@ -18,5 +18,5 @@ fn mask(pos: u6, comptime dir: u6) [2]u64 {
 }
 
 fn _mask(pos: u6) [4][2]u64 {
-    return [4][2]u64{ mask(pos, 1), mask(pos, 8), mask(pos, 9), mask(pos, 7) };
+    return .{ mask(pos, 1), mask(pos, 8), mask(pos, 9), mask(pos, 7) };
 }

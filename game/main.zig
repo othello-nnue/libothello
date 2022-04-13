@@ -71,14 +71,14 @@ pub fn move(self: Self, place: u6) ?Self {
     const t = self.flip(place);
     if (t == 0) return null;
     const temp = [2]u64{ self.board[1] ^ t, self.board[0] ^ t ^ (@as(u64, 1) << place) };
-    return Self{ .board = temp };
+    return .{ .board = temp };
 }
 
 // https://github.com/ziglang/zig/issues/3696
 /// Returns the state after pass.
 pub fn pass(self: Self) Self {
     assert(self.board[0] & self.board[1] == 0);
-    const temp = Self{ .board = .{ self.board[1], self.board[0] } };
+    const temp = .{ .board = .{ self.board[1], self.board[0] } };
     return temp;
 }
 
