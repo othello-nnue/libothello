@@ -45,25 +45,28 @@ pub fn moves_avx512(self: Self) u64 {
     x = z & rot(x, s *% t);
 
     return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
-    //return 0;
 }
 
 const has_avx512: bool = init: {
-    const isa = @import("builtin").target.cpu;
-    //@compileLog(isa.model);
-    const features = isa.model.*.features;
-    //const avx512 = @import("std").Target.x86.cpu.x86_64_v4.features;
-    const has = @import("std").Target.x86.featureSetHas(features, .avx2);
-    //@compileLog(@enumToInt(@import("std").Target.x86.Feature.avx2));
+    const x86 = @import("std").Target.x86;
+    const cpu = @import("builtin").target.cpu;
+    if (cpu.arch != .x86_64)
+        break :init false;
+    var features = cpu.model.*.features;
+    features.populateDependencies(&x86.all_features);
+    const has = x86.featureSetHas(features, .avx512f);
     break :init has;
 };
+
+// comptime {
+//     if (has_avx512)
+//         @compileLog("using avx512");
+// }
 
 /// Returns the set of legal moves.
 pub fn moves(self: Self) u64 {
     assert(self.board[0] & self.board[1] == 0);
-    //return if (has_avx512) moves_avx512(self) else moves_default(self);
-    //return moves_default(self);
-    return moves_avx512(self);
+    return if (has_avx512) moves_avx512(self) else moves_default(self);
 }
 
 /// Returns the set of stones that would be flipped.
