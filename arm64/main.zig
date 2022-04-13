@@ -21,16 +21,17 @@ fn flip_positive_scalar(board: [2]u64, place: u6) u64 {
 fn flip_positive(board: [2]u64, place: u6) u64 {
     const t = @as(u64, 1) << place;
     const m = MASK[place];
+    const high = @splat(4, @as(u64, 1) << 63);
     const zero = @splat(4, @as(u64, 0));
     const o = @splat(4, board[0]) & m;
-    const u = (o -% @splat(4, t)) & m & ~o;
+    const u = (o -% @splat(4, t)) & (m | high) & ~o;
     const v = @splat(4, board[1]) & u;
     const w = @select(u64, v == zero, u, zero);
     return @reduce(.Or, w);
 }
 
 pub fn flip(board: [2]u64, place: u6) u64 {
-    const a = [2]u64{ board[0], 0x1000_0000_0000_0001 | ~board[1] };
+    const a = [2]u64{ board[0], ~board[1] | 0x8000_0000_0000_0001 };
     const b = [2]u64{ @bitReverse(u64, a[0]), @bitReverse(u64, a[1]) };
 
     return flip_positive(a, place) |

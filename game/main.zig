@@ -75,12 +75,6 @@ pub fn move(self: Self, place: u6) ?Self {
     return Self{ .board = temp };
 }
 
-pub fn fastmove(self: Self, place: u6) Self {
-    const t = self.flip(place);
-    const temp = [2]u64{ self.board[1] & ~t, self.board[0] | t | (@as(u64, 1) << place) };
-    return Self{ .board = temp };
-}
-
 // https://github.com/ziglang/zig/issues/3696
 /// Returns the state after pass.
 pub fn pass(self: Self) Self {
