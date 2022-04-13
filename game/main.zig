@@ -50,16 +50,16 @@ pub fn moves_avx512(self: Self) u64 {
 fn _has_avx512() bool {
     const x86 = @import("std").Target.x86;
     const cpu = @import("builtin").target.cpu;
-    if (cpu.arch == .x86_64)
+    if (cpu.arch != .x86_64)
         return false;
-    var features = cpu.model.*.features;
+    var features = cpu.features;
     features.populateDependencies(&x86.all_features);
     const has = x86.featureSetHas(features, .avx512f);
     return has;
 }
 
 // https://github.com/ziglang/zig/issues/7386
-const has_avx512 = _has_avx512();
+pub const has_avx512 = _has_avx512();
 
 // comptime {
 //     if (has_avx512)
