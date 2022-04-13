@@ -20,24 +20,19 @@ fn flip_positive_scalar(board: [2]u64, place: u6) u64 {
 
 fn flip_positive(board: [2]u64, place: u6) u64 {
     const t = @as(u64, 1) << place;
-    const m: @Vector(4, u64) = MASK[place];
-    const n: @Vector(4, u64) = .{
-        mul(0xFF, 0x7E),
-        mul(0x7E, 0xFF),
-        mul(0x7E, 0x7E),
-        mul(0x7E, 0x7E),
-    };
-    const one = @splat(4, @as(u6, 1));
+    const m = MASK[place];
     const zero = @splat(4, @as(u64, 0));
-    const o = (@splat(4, board[0]) & m) >> one;
+    const o = @splat(4, board[0] >> 1) & m;
     const u = (o ^ (o -% @splat(4, t))) & m;
-    const v = u & @splat(4, board[1]) & n;
+    const v = @splat(4, board[1] >> 1) & u;
     const w = @select(u64, u == v, u, zero);
-    return @reduce(.Or, w);
+    return @reduce(.Or, w) << 1;
 }
 
 pub fn flip(board: [2]u64, place: u6) u64 {
-    const reversed = [2]u64{ @bitReverse(u64, board[0]), @bitReverse(u64, board[1]) };
-    return flip_positive(board, place) |
-        @bitReverse(u64, flip_positive(reversed, ~place));
+    const a = [2]u64{ board[0], board[0] | board[1] };
+    const b = [2]u64{ @bitReverse(u64, a[0]), @bitReverse(u64, a[1]) };
+    return (flip_positive(a, place) |
+        @bitReverse(u64, flip_positive(b, ~place))) &
+        board[1];
 }
