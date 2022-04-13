@@ -12,7 +12,9 @@ jobs:
       - jq/install
       - run: git submodule sync
       - run: git submodule update --init
-      - run: lscpu
+      - run: |
+          lscpu
+          zig targets | jq .native
       - run: |
           URL=$(wget -O - https://ziglang.org/download/index.json | jq -r '.master."'$(arch)'-linux".tarball' 2>&1)
           wget $URL
