@@ -7,19 +7,19 @@ board: [2]u64 = .{ 0x0000_0008_1000_0000, 0x0000_0010_0800_0000 },
 /// Returns the set of legal moves.
 pub fn moves_default(self: Self) u64 {
     const s = @Vector(4, u6){ 1, 7, 8, 9 };
-    const t = @splat(4, @as(u6, 2));
+    const t = s *% @splat(4, @as(u6, 2));
     const m = @Vector(4, u64){ mul(0xFF, 0x7E), mul(0xFF, 0x7E), mul(0xFF, 0xFF), mul(0xFF, 0x7E) };
 
     var x = @splat(4, self.board[0]);
     var y = @splat(4, self.board[1]) & m;
 
-    x = y & ((x << s) | (x >> s));
-    x |= y & ((x << s) | (x >> s));
+    x = y & (x << s | x >> s);
+    x |= y & (x << s | x >> s);
     y &= y << s;
-    x |= (y & x << (s * t)) | ((y >> s) & x >> (s * t));
-    x |= (y & x << (s * t)) | ((y >> s) & x >> (s * t));
+    x |= (y & x << t) | (y >> s & x >> t);
+    x |= (y & x << t) | (y >> s & x >> t);
 
-    x = (x << s) | (x >> s);
+    x = x << s | x >> s;
     return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
 }
 
@@ -31,7 +31,7 @@ fn rot(a: @Vector(8, u64), b: @Vector(8, u6)) @Vector(8, u64) {
 /// AVX-512 optimized
 pub fn moves_avx512(self: Self) u64 {
     const s = @Vector(8, u6){ 1, 7, 8, 9, 63, 57, 56, 55 };
-    const t = @splat(8, @as(u6, 2));
+    const t = s *% @splat(8, @as(u6, 2));
     const m = @Vector(8, u64){ mul(0xFF, 0x7E), mul(0x7E, 0x7E), mul(0x7E, 0xFF), mul(0x7E, 0x7E), mul(0xFF, 0x7E), mul(0x7E, 0x7E), mul(0x7E, 0xFF), mul(0x7E, 0x7E) };
 
     var x = @splat(8, self.board[0]);
@@ -40,31 +40,16 @@ pub fn moves_avx512(self: Self) u64 {
 
     x |= y & rot(x, s);
     y &= z;
-    x |= y & rot(x, s *% t);
-    x |= y & rot(x, s *% t);
-    x = z & rot(x, s *% t);
+    x |= y & rot(x, t);
+    x |= y & rot(x, t);
+    x = z & rot(x, t);
 
     return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
 }
 
-fn _has_avx512() bool {
-    const x86 = @import("std").Target.x86;
-    const cpu = @import("builtin").target.cpu;
-    if (cpu.arch != .x86_64)
-        return false;
-    var features = cpu.features;
-    features.populateDependencies(&x86.all_features);
-    const has = x86.featureSetHas(features, .avx512f);
-    return has;
-}
-
-// https://github.com/ziglang/zig/issues/7386
-pub const has_avx512 = _has_avx512();
-
-// comptime {
-//     if (has_avx512)
-//         @compileLog("using avx512");
-// }
+const has = @import("std").Target.x86.featureSetHas;
+const cpu = @import("builtin").target.cpu;
+pub const has_avx512 = (cpu.arch == .x86_64) and has(cpu.features, .avx512f);
 
 /// Returns the set of legal moves.
 pub fn moves(self: Self) u64 {
