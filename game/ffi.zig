@@ -1,9 +1,10 @@
 const game = @import("othello");
 //https://github.com/ziglang/zig/issues/11312
+//change so that & b is unnecessary (document "noise")
 export fn flip(a: u64, b: u64, c: u8) u64 {
     if (@truncate(u6, c) != c) unreachable;
     const x = game{ .board = .{ a, b } };
-    return x.flip(@intCast(u6, c));
+    return x.flip(@intCast(u6, c)) & b;
 }
 
 export fn moves(a: u64, b: u64) u64 {

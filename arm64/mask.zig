@@ -3,7 +3,7 @@ const fill = @import("utils").fill;
 
 fn mask(pos: u6, comptime dir: u6) u64 {
     const t = @as(u64, 1) << pos;
-    return fill(t, dir) & -%t << 1;
+    return (fill(t, dir) & -%t << 1) | (@as(u64, 1) << 63);
 }
 
 fn _mask(pos: u6) @Vector(4, u64) {

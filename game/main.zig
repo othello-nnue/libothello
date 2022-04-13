@@ -58,6 +58,7 @@ pub fn moves(self: Self) u64 {
 }
 
 /// Returns the set of stones that would be flipped.
+/// with some possible errors(to be documented)
 pub fn flip(self: Self, place: u6) u64 {
     assert(self.board[0] & self.board[1] == 0);
     return @import("arch").flip(self.board, place);
@@ -70,7 +71,13 @@ pub fn move(self: Self, place: u6) ?Self {
     if (@as(u64, 1) << place & (self.board[0] | self.board[1]) != 0) return null;
     const t = self.flip(place);
     if (t == 0) return null;
-    const temp = [2]u64{ self.board[1] ^ t, self.board[0] ^ t ^ (@as(u64, 1) << place) };
+    const temp = [2]u64{ self.board[1] & ~t, self.board[0] | t | (@as(u64, 1) << place) };
+    return Self{ .board = temp };
+}
+
+pub fn fastmove(self: Self, place: u6) Self {
+    const t = self.flip(place);
+    const temp = [2]u64{ self.board[1] & ~t, self.board[0] | t | (@as(u64, 1) << place) };
     return Self{ .board = temp };
 }
 
