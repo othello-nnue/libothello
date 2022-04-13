@@ -94,6 +94,7 @@ pub fn build(b: *std.build.Builder) void {
     const test_step = b.step("test", "Run library tests");
     for ([_]Pkg{ utils, arch, othello, testing }) |module| {
         var tests = b.addTestSource(module.path);
+        tests.setTarget(target);
         tests.setBuildMode(mode);
         if (module.dependencies) |deps|
             for (deps) |dep|

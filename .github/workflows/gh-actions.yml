@@ -10,10 +10,16 @@ jobs:
       - uses: goto-bus-stop/setup-zig@v1
         with:
           version: master
+      - name: Print cpu info
+        run: lscpu
       - name: Run Tests
         run: zig build test
       - name: Run Bench
         run: zig build bench
+      - name: Run Tests cpu=native
+        run: zig build test -Dcpu=native
+      - name: Run Bench cpu=native
+        run: zig build bench -Dcpu=native
       - name: Check Formatting
         run: zig fmt --check .
   Build:

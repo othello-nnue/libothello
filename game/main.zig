@@ -58,7 +58,7 @@ fn _has_avx512() bool {
     return has;
 }
 
-// https://github.com/ziglang/zig/issues/11424
+// https://github.com/ziglang/zig/issues/7386
 const has_avx512 = _has_avx512();
 
 // comptime {
