@@ -4,57 +4,29 @@ const mul = @import("utils").mul;
 
 board: [2]u64 = .{ 0x0000_0008_1000_0000, 0x0000_0010_0800_0000 },
 
-/// Returns the set of legal moves.
-pub fn moves_default(self: Self) u64 {
-    const s = @Vector(4, u6){ 1, 7, 8, 9 };
-    const t = s *% @splat(4, @as(u6, 2));
-    const m = @Vector(4, u64){ mul(0xFF, 0x7E), mul(0xFF, 0x7E), mul(0xFF, 0xFF), mul(0xFF, 0x7E) };
-
-    var x = @splat(4, self.board[0]);
-    var y = @splat(4, self.board[1]) & m;
-
-    x = y & (x << s | x >> s);
-    x |= y & (x << s | x >> s);
-    y &= y << s;
-    x |= (y & x << t) | (y >> s & x >> t);
-    x |= (y & x << t) | (y >> s & x >> t);
-
-    x = x << s | x >> s;
-    return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
+fn fill(board: [2]u64, comptime dir: u6) u64 {
+    var x = board[0];
+    var y = board[1] & comptime switch (@mod(dir, 8)) {
+        0 => mul(0xFF, 0xFF),
+        1, 7 => mul(0xFF, 0x7E),
+        else => unreachable,
+    };
+    inline for (.{ dir, dir * 2, dir * 4 }) |d| {
+        x |= (y & x << d) | (y >> (d - dir) & x >> d);
+        y &= y << d;
+    }
+    return x;
 }
-
-fn rot(a: @Vector(8, u64), b: @Vector(8, u6)) @Vector(8, u64) {
-    return (a << b) | (a >> (-%b));
-}
-
-/// Returns the set of legal moves.
-/// AVX-512 optimized
-pub fn moves_avx512(self: Self) u64 {
-    const s = @Vector(8, u6){ 1, 7, 8, 9, 63, 57, 56, 55 };
-    const t = s *% @splat(8, @as(u6, 2));
-    const m = @Vector(8, u64){ mul(0xFF, 0x7E), mul(0x7E, 0x7E), mul(0x7E, 0xFF), mul(0x7E, 0x7E), mul(0xFF, 0x7E), mul(0x7E, 0x7E), mul(0x7E, 0xFF), mul(0x7E, 0x7E) };
-
-    var x = @splat(8, self.board[0]);
-    var y = @splat(8, self.board[1]) & m;
-    const z = rot(y, s);
-
-    x |= y & rot(x, s);
-    y &= z;
-    x |= y & rot(x, t);
-    x |= y & rot(x, t);
-    x = z & rot(x, t);
-
-    return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
-}
-
-const has = @import("std").Target.x86.featureSetHas;
-const cpu = @import("builtin").target.cpu;
-pub const has_avx512 = (cpu.arch == .x86_64) and has(cpu.features, .avx512f);
 
 /// Returns the set of legal moves.
 pub fn moves(self: Self) u64 {
     assert(self.board[0] & self.board[1] == 0);
-    return if (has_avx512) moves_avx512(self) else moves_default(self);
+    var ret: u64 = 0;
+    inline for (.{ 1, 7, 8, 9 }) |i| {
+        var temp = fill(self.board, i) & self.board[1];
+        ret |= temp << i | temp >> i;
+    }
+    return ret & ~self.board[0] & ~self.board[1];
 }
 
 /// Returns the set of stones that would be flipped.
