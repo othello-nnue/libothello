@@ -21,9 +21,7 @@ pub fn perft(board: Game, depth: usize) u64 {
 
 pub fn print_avx512_usage() void {
     const print = std.debug.print;
-    if (Game.has_avx512) {
-        print("using AVX-512\n", .{});
-    } else print("using default\n", .{});
+    print("using default\n", .{});
 }
 
 //should change to property testing
@@ -53,7 +51,7 @@ test "perft test" {
 }
 
 test "check test" {
-    check(.{}, 11);
+    check(.{}, 8);
 }
 
 //https://www.aartbik.com/strategy.php
