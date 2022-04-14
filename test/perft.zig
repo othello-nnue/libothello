@@ -53,7 +53,7 @@ test "perft test" {
 }
 
 test "check test" {
-    check(.{}, 11);
+    check(.{}, 8);
 }
 
 //https://www.aartbik.com/strategy.php

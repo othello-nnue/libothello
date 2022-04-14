@@ -18,6 +18,8 @@ fn fill(board: [2]u64, comptime dir: u6) u64 {
     return x;
 }
 
+pub const has_avx512 = false;
+
 /// Returns the set of legal moves.
 pub fn moves(self: Self) u64 {
     assert(self.board[0] & self.board[1] == 0);
