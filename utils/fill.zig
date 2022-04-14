@@ -1,15 +1,16 @@
+const mul = @import("filter.zig").mul;
 pub fn fill(a: u64, comptime dir: u6) u64 {
     var b = a;
     comptime var x = switch (@mod(dir, 8)) {
-        0 => 0xFFFF_FFFF_FFFF_FFFF,
-        1 => 0xFEFE_FEFE_FEFE_FEFE,
-        7 => 0x7F7F_7F7F_7F7F_7F7F,
+        0 => mul(0xFF, 0xFF),
+        1 => mul(0xFF, 0xFE),
+        7 => mul(0xFF, 0x7F),
         else => unreachable,
     };
     comptime var y = switch (@mod(dir, 8)) {
-        0 => 0xFFFF_FFFF_FFFF_FFFF,
-        1 => 0x7F7F_7F7F_7F7F_7F7F,
-        7 => 0xFEFE_FEFE_FEFE_FEFE,
+        0 => mul(0xFF, 0xFF),
+        1 => mul(0xFF, 0x7F),
+        7 => mul(0xFF, 0xFE),
         else => unreachable,
     };
     inline for (.{ dir, dir * 2, dir * 4 }) |d| {
@@ -21,7 +22,6 @@ pub fn fill(a: u64, comptime dir: u6) u64 {
 }
 
 fn fill2(pos: u6, dir: u2) u64 {
-    const mul = @import("filter.zig").mul;
     const t = @as(u64, 1) << pos;
     var r =
         switch (dir) {
