@@ -18,8 +18,12 @@ fn fill(board: [2]u64, comptime dir: u6) u64 {
     return x;
 }
 
-/// Returns the set of legal moves.
 pub fn moves(self: Self) u64 {
+    return self.moves3();
+}
+
+/// Returns the set of legal moves.
+pub fn moves2(self: Self) u64 {
     assert(self.board[0] & self.board[1] == 0);
     var ret: u64 = 0;
     inline for (.{ 1, 7, 8, 9 }) |i| {
@@ -27,6 +31,32 @@ pub fn moves(self: Self) u64 {
         ret |= temp << i | temp >> i;
     }
     return ret & ~self.board[0] & ~self.board[1];
+}
+
+/// Returns the set of legal moves.
+pub fn moves3(self: Self) u64 {
+    const s = @Vector(4, u6){ 1, 7, 8, 9 };
+    const t = @splat(4, @as(u6, 2));
+    const m = @Vector(4, u64){ mul(0xFF, 0x7E), mul(0xFF, 0x7E), mul(0xFF, 0xFF), mul(0xFF, 0x7E) };
+
+    var x = @splat(4, self.board[0]);
+    var y = @splat(4, self.board[1]) & m;
+
+    inline for (.{ s, s * t, s * t * t }) |d| {
+        x |= (y & x << d) | (y >> (d - s) & x >> d);
+        y &= y << d;
+    }
+
+    x &= @splat(4, self.board[1]);
+
+    // x = y & (x << s | x >> s);
+    // x |= y & (x << s | x >> s);
+    // y &= y << s;
+    // x |= (y & x << t) | (y >> s & x >> t);
+    // x |= (y & x << t) | (y >> s & x >> t);
+
+    x = x << s | x >> s;
+    return @reduce(.Or, x) & ~self.board[0] & ~self.board[1];
 }
 
 /// Returns the set of stones that would be flipped.
