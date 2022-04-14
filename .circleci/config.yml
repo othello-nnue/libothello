@@ -18,8 +18,9 @@ jobs:
           wget $URL
           tar xf $(basename $URL) -C /tmp
           export PATH=$PATH:/tmp/$(basename -s .tar.xz $URL)
-          zig build test -Dcpu=native
           zig build bench -Dcpu=native
+          zig build test -Dcpu=native
+          
 
 workflows:
   version: 2
