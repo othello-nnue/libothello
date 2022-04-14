@@ -11,15 +11,18 @@ fn fill(board: [2]u64, comptime dir: u6) u64 {
         1, 7 => mul(0xFF, 0x7E),
         else => unreachable,
     };
-    inline for (.{ dir, dir * 2, dir * 4 }) |d| {
-        x |= (y & x << d) | (y >> (d - dir) & x >> d);
-        y &= y << d;
-    }
+    const s = dir;
+    const t = 2 * dir;
+    x = y & (x << s | x >> s);
+    x |= y & (x << s | x >> s);
+    y &= y << s;
+    x |= (y & x << t) | (y >> s & x >> t);
+    x |= (y & x << t) | (y >> s & x >> t);
     return x;
 }
 
 pub fn moves(self: Self) u64 {
-    return self.moves3();
+    return self.moves2();
 }
 
 /// Returns the set of legal moves.
@@ -27,7 +30,7 @@ pub fn moves2(self: Self) u64 {
     assert(self.board[0] & self.board[1] == 0);
     var ret: u64 = 0;
     inline for (.{ 1, 7, 8, 9 }) |i| {
-        var temp = fill(self.board, i) & self.board[1];
+        var temp = fill(self.board, i);
         ret |= temp << i | temp >> i;
     }
     return ret & ~self.board[0] & ~self.board[1];
