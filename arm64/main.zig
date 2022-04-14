@@ -21,7 +21,8 @@ fn flip_positive_scalar(board: [2]u64, place: u6) u64 {
 fn flip_positive(board: [2]u64, place: u6) u64 {
     const t = @as(u64, 1) << place;
     const m = MASK[place];
-    const high = @splat(4, @as(u64, 1) << 63);
+    //const high = @splat(4, @as(u64, 1) << 63);
+    const high = @splat(4, @as(u64, 0x8000_0000_0000_0001));
     const zero = @splat(4, @as(u64, 0));
     const o = @splat(4, board[0]) & m;
     const u = (o -% @splat(4, t)) & (m | high) & ~o;
