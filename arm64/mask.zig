@@ -11,8 +11,4 @@ fn _mask(pos: u6) @Vector(4, u64) {
     return .{ mask(pos, 1), mask(pos, 8), mask(pos, 9), mask(pos, 7) };
 }
 
-<<<<<<< HEAD
 pub const MASK = make(@Vector(4, u64), _mask);
-=======
-pub const MASK = @import("utils").make_array(@Vector(4, u64), _mask);
->>>>>>> arm-patch2
