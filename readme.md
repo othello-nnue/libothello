@@ -13,7 +13,7 @@ This is [Zig](ziglang.org) port of [Othello move generator](https://gitlab.com/r
     └── readme.md
 
 # Move generation
-We implement [Kogge-Stone Algorithm](https://www.chessprogramming.org/Kogge-Stone_Algorithm) for move generation. It should compile to vector instructions. 
+We implement [Kogge-Stone Algorithm](https://www.chessprogramming.org/Kogge-Stone_Algorithm) for move generation. On x86-64-v4 CPUs, we use rotation instead of shifts to scan 8 directions simultaneously. We use bidirectional Kogge-Stone for other CPUs.
 
 # Move resolution
 ## AMD64
@@ -31,3 +31,10 @@ On ARM processors we implement [Hyperbola Quintessence](https://www.chessprogram
 Name | Type | Size
 ----:|----:|----:
 `mask`|`[64][4]u64`|2KiB
+
+# Performance
+
+Perft suggests this repo is about 2X faster than edax-reversi-AVX. But note that:
+1. [Some libraries](https://github.com/Gigantua/Gigantua) can generate moves faster than stockfish because stockfish generates incremental eval info simultaneously.
+2. The definition of perft is different. Specifically, we ignore the game termination condition.
+
