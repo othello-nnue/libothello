@@ -1,6 +1,6 @@
-pub const mul = @import("filter.zig").mul;
-pub const make_array = @import("lut.zig").make_array;
-pub const fill = @import("fill.zig").fill;
+usingnamespace @import("filter.zig");
+usingnamespace @import("lut.zig");
+usingnamespace @import("fill.zig");
 
 test {
     const std = @import("std");
