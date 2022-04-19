@@ -4,6 +4,7 @@ const pext = @import("intrinsic.zig").pext;
 const MASK = @import("mask.zig").MASK;
 const INDEX = @import("index.zig").INDEX;
 const RESULT = @import("test.zig").known;
+// const RESULT = @import("result.zig").result();
 
 pub fn flip(board: [2]u64, place: u6) u64 {
     var ret: u64 = 0;
@@ -15,6 +16,13 @@ pub fn flip(board: [2]u64, place: u6) u64 {
     return ret;
 }
 
+pub fn prefetch() void {
+    @prefetch(&MASK, .{});
+    @prefetch(&INDEX, .{});
+    @prefetch(&RESULT, .{});
+}
+
 test {
     _ = @import("test.zig");
+    _ = @import("index.zig");
 }

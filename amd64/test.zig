@@ -1,4 +1,4 @@
-pub const known = [0x3000]u8{
+pub const known = [0x3000]u6{
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  1,  0,  0,  0,  1,  0,  0,  0,  1,  0,  0,  0,  1,  0,  0,  0,  1,  0,  0,  0,  1,  0,  0,  0,  1,  0,  0,  0,  1,  0,  0,
@@ -389,7 +389,9 @@ const testing = @import("std").testing;
 
 test "result test" {
     const res = @import("result.zig").result();
-    try testing.expectEqualSlices(u8, &res, &known);
+    try testing.expectEqualSlices(u6, &res, &known);
+    try testing.expectEqual(0x3000, @sizeOf(@TypeOf(res)));
+    try testing.expectEqual(0x3000, @sizeOf(@TypeOf(known)));
 }
 
 test "range test" {
@@ -398,4 +400,9 @@ test "range test" {
         for (i) |j|
             for (j) |k|
                 try testing.expect(@popCount(u64, k) <= 6);
+}
+
+test "size test" {
+    const INDEX = @import("index.zig").INDEX;
+    try testing.expectEqual(2 * 4 * 64, @sizeOf(@TypeOf(INDEX)));
 }

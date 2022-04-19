@@ -1,6 +1,5 @@
 const pdep = @import("intrinsic.zig").pdep;
 const pext = @import("intrinsic.zig").pext;
-const assume = @import("intrinsic.zig").assume;
 
 fn res(i: u3, p: u8, n: u8) u8 {
     if (p & n != 0)
@@ -24,19 +23,12 @@ fn res(i: u3, p: u8, n: u8) u8 {
     return ret;
 }
 
-//https://github.com/ziglang/zig/issues/11312
-fn intCast(comptime T: type, a: anytype) T {
-    const b = @intCast(T, a);
-    assume(a == b);
-    return b;
-}
-
-pub fn result() [0x3000]u8 {
-    var ret: [0x3000]u8 = undefined;
+pub fn result() [0x3000]u6 {
+    var ret: [0x3000]u6 = undefined;
     const HELPER = @import("index.zig").HELPER;
 
     for (HELPER) |i, index| {
-        const ind = intCast(u3, index);
+        const ind = @intCast(u3, index);
         const mask = @import("mask.zig").MASK[ind][0];
         const range: u7 = switch (ind) {
             0, 7 => 64,
@@ -48,11 +40,11 @@ pub fn result() [0x3000]u8 {
         while (j < range) : (j += 1) {
             var k: u64 = 0;
             while (k < range) : (k += 1) {
-                const ii = i * 32 + j * 64 + k;
-                const jj = intCast(u8, pdep(j, mask[0]));
-                const kk = intCast(u8, pdep(k, mask[1]));
+                const ii = @as(u64, i) * 32 + j * 64 + k;
+                const jj = @intCast(u8, pdep(j, mask[0]));
+                const kk = @intCast(u7, pdep(k, mask[1]));
 
-                ret[ii] = intCast(u8, pext(res(ind, jj, kk), mask[1]));
+                ret[ii] = @intCast(u6, pext(res(ind, jj, kk), mask[1]));
             }
         }
     }
