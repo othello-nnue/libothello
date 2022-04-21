@@ -8,6 +8,7 @@ extern fn @"llvm.assume"(bool) void;
 const vscale = undefined;
 extern fn @"llvm.aarch64.sve.bdep.x.nx2i64"(@Vector(2 * vscale, u64), @Vector(2 * vscale, u64)) @Vector(2 * vscale, u64);
 extern fn @"llvm.aarch64.sve.bext.x.nx2i64"(@Vector(2 * vscale, u64), @Vector(2 * vscale, u64)) @Vector(2 * vscale, u64);
+//ld1b gather
 
 //todo : RISC-V
 extern fn @"llvm.riscv.bdepw.i64"(u64, u64) u64;
