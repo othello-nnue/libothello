@@ -4,11 +4,11 @@ const FS = std.build.FileSource;
 
 const utils = Pkg{
     .name = "utils",
-    .path = FS{ .path = "utils/main.zig" },
+    .source = FS{ .path = "utils/main.zig" },
 };
 const bench = Pkg{
     .name = "bench",
-    .path = FS{ .path = "zig-bench/bench.zig" },
+    .source = FS{ .path = "zig-bench/bench.zig" },
 };
 
 // var target: std.zig.CrossTarget = undefined;
@@ -22,7 +22,7 @@ pub fn build(b: *std.build.Builder) void {
 
     const arch = Pkg{
         .name = "arch",
-        .path = FS{
+        .source = FS{
             .path = switch (isa) {
                 .aarch64 => "arm64/main.zig",
                 .x86_64 => "amd64/main.zig",
@@ -33,12 +33,12 @@ pub fn build(b: *std.build.Builder) void {
     };
     const othello = Pkg{
         .name = "othello",
-        .path = FS{ .path = "game/main.zig" },
+        .source = FS{ .path = "game/main.zig" },
         .dependencies = &.{ utils, arch },
     };
     const testing = Pkg{
         .name = "perft",
-        .path = FS{ .path = "test/perft.zig" },
+        .source = FS{ .path = "test/perft.zig" },
         .dependencies = &.{othello},
     };
     {
@@ -93,7 +93,7 @@ pub fn build(b: *std.build.Builder) void {
     }
     const test_step = b.step("test", "Run library tests");
     for ([_]Pkg{ utils, arch, othello, testing }) |module| {
-        var tests = b.addTestSource(module.path);
+        var tests = b.addTestSource(module.source);
         tests.setTarget(target);
         tests.setBuildMode(mode);
         if (module.dependencies) |deps|
