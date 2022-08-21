@@ -13,16 +13,19 @@ jobs:
       - name: Print cpu info
         run: lscpu
       - name: Run Tests
-        run: zig build test
-        run: zig build test
-      - name: Run Bench -fstage1
+        run: |
+          zig build test
+          zig build test -fstage1
+      - name: Run Bench
         run: zig build bench
       - name: Run Tests cpu=native
-        run: zig build test -fstage1 -Dcpu=native
-        run: zig build test -Dcpu=native
+        run: |
+          zig build test -fstage1 -Dcpu=native
+          zig build test -Dcpu=native
       - name: Run Bench cpu=native
-        run: zig build bench -fstage1 -Dcpu=native
-        run: zig build bench -Dcpu=native
+        run: |
+          zig build bench -fstage1 -Dcpu=native
+          zig build bench -Dcpu=native
       - name: Check Formatting
         run: zig fmt --check .
   Build:
