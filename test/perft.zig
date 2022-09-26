@@ -8,10 +8,10 @@ pub fn perft(board: Game, depth: usize) u64 {
     var moves = board.moves();
     if (moves == 0)
         return perft(board.pass(), depth - 1);
-    if (depth == 1) return @popCount(u64, moves);
+    if (depth == 1) return @popCount(moves);
     var sum: u64 = 0;
     while (moves != 0) {
-        const i = @intCast(u6, @ctz(u64, moves));
+        const i = @intCast(u6, @ctz(moves));
 
         moves &= moves - 1;
         sum += perft(board.move(i).?, depth - 1);

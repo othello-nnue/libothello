@@ -1,6 +1,6 @@
-usingnamespace @import("filter.zig");
-usingnamespace @import("lut.zig");
-usingnamespace @import("fill.zig");
+pub usingnamespace @import("filter.zig");
+pub usingnamespace @import("lut.zig");
+pub usingnamespace @import("fill.zig");
 
 test {
     const std = @import("std");

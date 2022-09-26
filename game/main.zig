@@ -94,13 +94,13 @@ pub fn end(self: Self) bool {
 /// Returns final score.
 pub fn score(self: Self) i8 {
     assert(self.board[0] & self.board[1] == 0);
-    return @as(i8, @popCount(u64, self.board[0])) - 32;
+    return @as(i8, @popCount(self.board[0])) - 32;
 }
 
 /// Returns move number.
 pub fn movenum(self: Self) u6 {
     assert(self.board[0] & self.board[1] == 0);
-    return @popCount(u64, self.board[0] | self.board[1]);
+    return @popCount(self.board[0] | self.board[1]);
 }
 
 const filled = @import("utils").fill;

@@ -399,7 +399,7 @@ test "range test" {
     for (MASK) |i|
         for (i) |j|
             for (j) |k|
-                try testing.expect(@popCount(u64, k) <= 6);
+                try testing.expect(@popCount(k) <= 6);
 }
 
 test "size test" {

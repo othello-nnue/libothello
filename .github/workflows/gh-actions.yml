@@ -19,13 +19,9 @@ jobs:
       - name: Run Bench
         run: zig build bench
       - name: Run Tests cpu=native
-        run: |
-          zig build test -fstage1 -Dcpu=native
-          zig build test -Dcpu=native
+        run: zig build test -fstage1 -Dcpu=native
       - name: Run Bench cpu=native
-        run: |
-          zig build bench -fstage1 -Dcpu=native
-          zig build bench -Dcpu=native
+        run: zig build bench -fstage1 -Dcpu=native
       - name: Check Formatting
         run: zig fmt --check .
   Build:

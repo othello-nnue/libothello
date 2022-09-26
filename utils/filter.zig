@@ -1,6 +1,6 @@
 // make square filter
 pub inline fn mul(comptime x: u8, comptime y: u8) u64 {
-    return comptime @byteSwap(u64, (@as(u64, x) *% 0x8040_2010_0804_0201 & 0x8080_8080_8080_8080) >> 7) * y;
+    return comptime @byteSwap((@as(u64, x) *% 0x8040_2010_0804_0201 & 0x8080_8080_8080_8080) >> 7) * y;
 }
 
 // fn mul2(x: u8, y: u8) u64 {
