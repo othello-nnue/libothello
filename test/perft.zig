@@ -40,7 +40,7 @@ fn check(board: Game, depth: usize) void {
         if ((board.board[0] | board.board[1]) & j != 0) continue;
         const t = board.move(i);
         if ((t == null) != (moves & j == 0))
-            panic("{} {} {}\n", .{ board, t, i });
+            panic("{} {any} {}\n", .{ board, t, i });
         if (t) |u|
             check(u, depth - 1);
     }
