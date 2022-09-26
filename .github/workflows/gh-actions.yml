@@ -15,7 +15,7 @@ jobs:
       - name: Run Tests
         run: zig build test -fstage1
       - name: Run Bench
-        run: zig build bench
+        run: zig build bench -fstage1
       - name: Run Tests cpu=native
         run: zig build test -fstage1 -Dcpu=native
       - name: Run Bench cpu=native
