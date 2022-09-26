@@ -19,8 +19,8 @@ jobs:
           tar xf $(basename $URL) -C /tmp
           export PATH=$PATH:/tmp/$(basename -s .tar.xz $URL)
           zig targets | jq .native
-          zig build bench -Dcpu=native
-          zig build test -Dcpu=native
+          zig build bench -Dcpu=native -fstage1
+          zig build test -Dcpu=native -fstage1
           
 
 workflows:

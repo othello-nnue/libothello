@@ -20,12 +20,12 @@ export fn stable(a: u64, b: u64) u64 {
 //easier to export each function
 //isn't really performance critical
 export fn vert(x: u64) u64 {
-    return @byteSwap(u64, x);
+    return @byteSwap(x);
 }
 
 export fn hori(x: u64) u64 {
     //return @byteSwap(u64, @bitReverse(u64, x));
-    return @bitReverse(u64, @byteSwap(u64, x));
+    return @bitReverse(@byteSwap(x));
 }
 
 const mul = @import("utils").mul;
