@@ -32,8 +32,8 @@ fn flip_positive(board: [2]u64, place: u6) u64 {
 
 pub fn flip(board: [2]u64, place: u6) u64 {
     const a = [2]u64{ board[0], ~board[1] | 0x8000_0000_0000_0001 };
-    const b = [2]u64{ @bitReverse(u64, a[0]), @bitReverse(u64, a[1]) };
+    const b = [2]u64{ @bitReverse(a[0]), @bitReverse(a[1]) };
 
     return flip_positive(a, place) |
-        @bitReverse(u64, flip_positive(b, ~place));
+        @bitReverse(flip_positive(b, ~place));
 }
