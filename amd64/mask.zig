@@ -18,5 +18,9 @@ fn mask(pos: u6, comptime dir: u6) [2]u64 {
 }
 
 fn _mask(pos: u6) [4][2]u64 {
-    return .{ mask(pos, 1), mask(pos, 8), mask(pos, 9), mask(pos, 7) };
+    if (@truncate(u1, mul(0b0011_1100, 0b0011_1100) >> pos) == 0) {
+        return .{ mask(pos, 1), mask(pos, 8), mask(pos, 9) | mask(pos, 7), 0 };
+    } else {
+        //do something...
+    }
 }

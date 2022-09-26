@@ -9,6 +9,6 @@ fn index(pos: u6) [4]u9 {
         HELPER[a],
         HELPER[b],
         HELPER[min(a, b)],
-        HELPER[min(7 - a, b)],
+        0,
     };
 }
