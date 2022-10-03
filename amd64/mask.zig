@@ -18,9 +18,33 @@ fn mask(pos: u6, comptime dir: u6) [2]u64 {
 }
 
 fn _mask(pos: u6) [4][2]u64 {
-    if (@truncate(u1, mul(0b0011_1100, 0b0011_1100) >> pos) == 0) {
-        return .{ mask(pos, 1), mask(pos, 8), mask(pos, 9) | mask(pos, 7), 0 };
+    const dummy = [2]u64{ 0, 0 };
+    if (@truncate(u1, mul(0x18, 0x18) >> pos) != 0) {
+        //we don't support this case, so output nonsense for early error detection
+
+        return [_][2]u64{dummy} ** 4;
     } else {
-        //do something...
+        const temp1 = mask(pos, 7);
+        const temp2 = mask(pos, 9);
+
+        var t = ~@as(u64, 0);
+        const u = @truncate(u3, pos);
+        if (u == 2 and pos >= 18) {
+            t = mul(0xFF, 0xF8);
+        } else if (u == 5 and pos <= 45) {
+            t = mul(0xFF, 0x1F);
+        } else if (t == 19 or t == 20) {
+            t = mul(0xF8, 0xFF);
+        } else if (t == 43 or t == 44) {
+            t = mul(0x1F, 0xFF);
+        }
+        //long diagonals
+        const diag = [2]u64{ (temp1[0] | temp2[0]) & t, (temp1[1] | temp2[1]) & t };
+        //very short diagonals, flipping at most one)
+        const short = [2]u64{ (temp1[0] | temp2[0]) & ~t, (temp1[1] | temp2[1]) & ~t };
+        if (@popCount(short[0]) > 2 or @popCount(short[1]) > 2) {
+            unreachable;
+        }
+        return .{ mask(pos, 1), mask(pos, 8), diag, short };
     }
 }

@@ -16,7 +16,7 @@ pub fn flip(board: [2]u64, place: u6) u64 {
     ret |= pdep(RESULT[
             @as(u64, INDEX[place][2]) * 32 | pext(board[0], MASK[place][i][0]) * 64 + pext(board[1], MASK[place][i][1])
         ], MASK[place][i][1]);
-    ret |= (((board[0] & MASK[place][3][0]) * 0x05_0005) >> 9) & board[1] & MASK[place][3][0];
+    ret |= (((board[0] & MASK[place][3][0]) *% 0x05_0005) >> 9) & board[1] & MASK[place][3][0];
     return ret;
 }
 
