@@ -9,13 +9,14 @@ const RESULT = @import("test.zig").known;
 pub fn flip(board: [2]u64, place: u6) u64 {
     var ret: u64 = 0;
     comptime var i = 0;
-    inline while (i < 2) : (i += 1)
+    inline while (i < 3) : (i += 1)
         ret |= pdep(RESULT[
             @as(u64, INDEX[place][i]) * 32 + pext(board[0], MASK[place][i][0]) * 64 + pext(board[1], MASK[place][i][1])
         ], MASK[place][i][1]);
-    ret |= pdep(RESULT[
-            @as(u64, INDEX[place][2]) * 32 | pext(board[0], MASK[place][i][0]) * 64 + pext(board[1], MASK[place][i][1])
-        ], MASK[place][i][1]);
+    // plan to further shave 2KiB
+    // ret |= pdep(RESULT[
+    //     @as(u64, INDEX[place][2]) * 32 | pext(board[0], MASK[place][i][0]) * 64 + pext(board[1], MASK[place][i][1])
+    // ], MASK[place][i][1]);
     ret |= (((board[0] & MASK[place][3][0]) *% 0x05_0005) >> 9) & board[1] & MASK[place][3][0];
     return ret;
 }

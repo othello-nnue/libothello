@@ -21,7 +21,6 @@ fn _mask(pos: u6) [4][2]u64 {
     const dummy = [2]u64{ 0, 0 };
     if (@truncate(u1, mul(0x18, 0x18) >> pos) != 0) {
         //we don't support this case, so output nonsense for early error detection
-
         return [_][2]u64{dummy} ** 4;
     } else {
         const temp1 = mask(pos, 7);
