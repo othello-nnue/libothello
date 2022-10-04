@@ -1,24 +1,10 @@
-const pdep = @import("intrinsic.zig").pdep;
-const pext = @import("intrinsic.zig").pext;
-
 fn res(i: u3, p: u8, n: u8) u8 {
-    if ((p << 1) & n & (@as(u8, 0xFE) << i) != 0 or p & (n << 1) & ((@as(u8, 1) << i) - 1) != 0)
+    const m = (@as(u8, 1) << i) - 1;
+    if (p & (n >> 1 & ~m | (n << 1 & m)) != 0)
         return 0;
 
-    var ret: u8 = 0;
-    {
-        var t = ((n >> i) + 1) & ((p >> i) << 1);
-        if (t != 0)
-            ret |= (t - 1) << i;
-    }
-    {
-        //var u = (n + (p << 1)) & (@as(u8, 1) << i);
-        var t = ~n & ((@as(u8, 1) << i) - 1);
-        t = @as(u8, 1) << @intCast(u3, 8 - @clz(t));
-        if (t & p != 0)
-            ret |= (@as(u8, 1) << i) - t;
-    }
-    return ret;
+    return m & -%(@as(u8, 1) << @intCast(u3, 8 - @clz(~n & m)) & p) |
+        (((n >> i) + 1 & p >> i << 1) -| 1 << i);
 }
 
 pub fn result() [0x3000]u6 {
