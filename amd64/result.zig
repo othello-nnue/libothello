@@ -7,33 +7,27 @@ fn res(i: u3, p: u8, n: u8) u8 {
         (((n >> i) + 1 & p >> i << 1) -| 1 << i);
 }
 
-pub fn result() [0x3000]u6 {
+pub const RESULT = init: {
+    @setEvalBranchQuota(1000000);
     var ret: [0x3000]u6 = undefined;
-    const HELPER = @import("index.zig").HELPER;
 
-    for (HELPER) |i, index| {
+    for (@import("index.zig").HELPER) |i, index| {
         const range: u7 = switch (index) {
             0, 7 => 64,
             else => 32,
-            1, 6 => continue,
         };
-        const ind: u3 = switch (index) {
-            0 => 0,
-            7 => 6,
-            else => @intCast(u3, index - 1),
-        };
+        const ind: u3 = @intCast(u3, index -| 1);
 
-        var j: u64 = 0;
+        var j: u8 = 0;
         while (j < range) : (j += 1) {
-            var k: u64 = 0;
+            var k: u8 = 0;
             while (k < range) : (k += 1) {
-                const ii = @as(u64, i) * 32 + j * 64 + k;
-                const jj = @intCast(u6, j);
-                const kk = @intCast(u6, k);
+                const ii = @as(u64, i + 2 * j) * 32 + k;
 
-                ret[ii] = @intCast(u6, res(ind, jj, kk));
+                ret[ii] = @intCast(u6, res(ind, j, k));
             }
         }
     }
-    return ret;
-}
+
+    break :init ret;
+};
