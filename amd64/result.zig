@@ -1,10 +1,10 @@
-fn res(i: u3, p: u8, n: u8) u8 {
-    const m = (@as(u8, 1) << i) - 1;
+fn res(i: u3, p: u7, n: u7) u7 {
+    const m = (@as(u7, 1) << i) - 1;
     if (p & (n >> 1 & ~m | (n << 1 & m)) != 0)
         return 0;
 
-    return m & -%(@as(u8, 1) << @intCast(u3, 8 - @clz(~n & m)) & p) |
-        (((n >> i) + 1 & p >> i << 1) -| 1 << i);
+    return m & -%(@as(u7, 1) << (7 - @clz(~n & m)) & p) |
+        ((n >> i) + 1 & p >> i << 1) -| 1 << i;
 }
 
 pub const RESULT = init: {
@@ -18,9 +18,9 @@ pub const RESULT = init: {
         };
         const ind: u3 = @intCast(u3, index -| 1);
 
-        var j: u8 = 0;
+        var j: u7 = 0;
         while (j < range) : (j += 1) {
-            var k: u8 = 0;
+            var k: u7 = 0;
             while (k < range) : (k += 1) {
                 const ii = @as(u64, i + 2 * j) * 32 + k;
 
