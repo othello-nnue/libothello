@@ -6,9 +6,9 @@ pub const INDEX = @import("utils").make_array([4]u9, index);
 fn index(pos: u6) [4]u9 {
     const a = @truncate(u3, pos);
     const b = @truncate(u3, pos >> 3);
-    var c = min(b, max(a, 7 - a));
+    var c: u4 = min(b, max(a, 7 - a));
     if (a == 3 or a == 4) {
-        c = a + if (b > 3) 7 else 5;
+        c = @as(u4, a) + if (b > 3) @as(u4, 7) else @as(u4, 5);
     }
     return .{
         HELPER[a],

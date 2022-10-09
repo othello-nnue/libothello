@@ -19,7 +19,7 @@ fn special(i: u2, p: u5, n: u5) u5 {
 }
 fn gen(mask: u5, p: u5, n: u5, is_up: bool) u5 {
     if (is_up) {
-        const nn = (n | ~mask) + 1;
+        const nn = (n | ~mask) +% 1;
         return ((nn & (p & mask -| 1)) -| 1) & mask;
     } else {
         const nn = @truncate(u5, @as(u6, 1) << (5 - @clz(~n & mask)));
@@ -44,11 +44,11 @@ pub const RESULT = init: {
             var k: u7 = 0;
             while (k < range) : (k += 1) {
                 const ii = @as(u64, i + 2 * j) * 32 + k;
-                if (i < 8) {
+                if (index < 8) {
                     const ind: u3 = @intCast(u3, index -| 1);
                     ret[ii] = @intCast(u6, res(ind, j, k));
                 } else {
-                    ret[ii] = gen(@intCast(u2, i - 8, j, k));
+                    ret[ii] = special(@intCast(u2, index - 8), j, k);
                 }
             }
         }

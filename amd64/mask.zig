@@ -32,9 +32,9 @@ fn _mask(pos: u6) [4][2]u64 {
             t = mul(0xFF, 0xF8);
         } else if (u == 5 and pos <= 45) {
             t = mul(0xFF, 0x1F);
-        } else if (t == 19 or t == 20) {
+        } else if (pos == 19 or pos == 20) {
             t = mul(0xF8, 0xFF);
-        } else if (t == 43 or t == 44) {
+        } else if (pos == 43 or pos == 44) {
             t = mul(0x1F, 0xFF);
         }
         //long diagonals
