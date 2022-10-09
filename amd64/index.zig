@@ -13,7 +13,7 @@ fn index(pos: u6) [4]u9 {
     if (pos == 2 or pos == 10) {
         c = 2;
     }
-    if (pos == 61 or pos == 53){
+    if (pos == 61 or pos == 53) {
         c = 5;
     }
     return .{

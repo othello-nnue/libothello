@@ -15,7 +15,7 @@ test "range test" {
                 testing.expect(@popCount(k) <= 6) catch {
                     print("{} \n", .{k});
                     unreachable;
-                    };
+                };
 }
 
 test "size test" {
