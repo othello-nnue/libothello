@@ -53,7 +53,9 @@ test "perft test" {
 }
 
 test "check test" {
-    check(.{}, 11);
+    //for minimal error case generation
+    inline for (.{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 }) |d|
+        check(.{}, d);
 }
 
 //https://www.aartbik.com/strategy.php
