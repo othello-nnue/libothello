@@ -7,10 +7,10 @@ fn res(i: u3, p: u7, n: u7) u7 {
         ((n >> i) + 1 & p >> i << 1) -| 1 << i;
 }
 
-const gen_mask = [2]u5{ 0b00101, 0b01010 };
+const gen_mask = [4]u5{ 0b00101, 0b01010, 0b01010, 0b10100 };
 
 fn special(i: u2, p: u5, n: u5) u5 {
-    const mask = gen_mask[@truncate(u1, @popCount(i))];
+    const mask = gen_mask[i];
     if (i < 2) {
         return gen(mask, p, n, true) | gen(~mask, p, n, true);
     } else {
@@ -19,8 +19,10 @@ fn special(i: u2, p: u5, n: u5) u5 {
 }
 fn gen(mask: u5, p: u5, n: u5, is_up: bool) u5 {
     if (is_up) {
-        const nn = (n | ~mask) +% 1;
-        return ((nn & (p & mask -| 1)) -| 1) & mask;
+        const nn = @as(u6, n | ~mask) + 1;
+        const nnn = @intCast(u5, (nn & -%nn) - 1);
+        if (nnn & p & mask == 0) return 0;
+        return nnn & mask;
     } else {
         const nn = @truncate(u5, @as(u6, 1) << (5 - @clz(~n & mask)));
         if (p & mask & -%nn != 0) {

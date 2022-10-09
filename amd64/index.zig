@@ -10,6 +10,12 @@ fn index(pos: u6) [4]u9 {
     if (a == 3 or a == 4) {
         c = @as(u4, a) + if (b > 3) @as(u4, 7) else @as(u4, 5);
     }
+    if (pos == 2 or pos == 10) {
+        c = 2;
+    }
+    if (pos == 61 or pos == 53){
+        c = 5;
+    }
     return .{
         HELPER[a],
         HELPER[b],
