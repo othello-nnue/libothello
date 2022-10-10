@@ -79,7 +79,7 @@ pub fn build(b: *std.build.Builder) void {
         run_step.dependOn(&run_cmd.step);
     }
     {
-        const exe = b.addExecutable("perf", "test/bench.zig");
+        const exe = b.addExecutable("bench", "test/bench.zig");
         exe.setTarget(target);
         exe.setBuildMode(std.builtin.Mode.ReleaseFast);
         exe.addPackage(othello);
@@ -90,6 +90,20 @@ pub fn build(b: *std.build.Builder) void {
 
         const run_step = b.step("bench", "Run benchmark tests");
         run_step.dependOn(&run_cmd.step);
+    }
+    {
+        const exe = b.addExecutable("perf", "test/bench2.zig");
+        exe.setTarget(target);
+        exe.setBuildMode(std.builtin.Mode.ReleaseFast);
+        exe.addPackage(othello);
+        exe.addPackage(bench);
+        exe.addPackage(testing);
+
+        // exe.install();
+        const install = b.addInstallArtifact(exe);
+
+        const run_step = b.step("perf", "Compile executable for perf");
+        run_step.dependOn(&install.step);
     }
     const test_step = b.step("test", "Run library tests");
     for ([_]Pkg{ utils, arch, othello, testing }) |module| {
