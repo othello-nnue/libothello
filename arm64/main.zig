@@ -37,3 +37,7 @@ pub fn flip(board: [2]u64, place: u6) u64 {
     return flip_positive(a, place) |
         @bitReverse(flip_positive(b, ~place));
 }
+
+pub fn prefetch() void {
+    @prefetch(&MASK, .{});
+}

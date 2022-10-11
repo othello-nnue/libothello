@@ -4,6 +4,10 @@ const mul = @import("utils").mul;
 
 board: [2]u64 = .{ 0x0000_0008_1000_0000, 0x0000_0010_0800_0000 },
 
+pub fn init() void {
+    @import("arch").prefetch();
+}
+
 /// Returns the set of legal moves.
 pub fn moves_default(self: Self) u64 {
     const s = @Vector(4, u6){ 1, 7, 8, 9 };
