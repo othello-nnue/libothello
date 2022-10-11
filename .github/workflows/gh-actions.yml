@@ -23,7 +23,7 @@ jobs:
       - name : Run perf stat
         run: |
           zig build perf -fstage1 -Dcpu=native
-          perf stat ./zig-out/bin/perf record ./zig-out/bin/perf
+          perf stat ./zig-out/bin/perf
       - uses: actions/upload-artifact@v3
         with:
           name: perf.data
