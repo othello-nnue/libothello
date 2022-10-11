@@ -20,14 +20,6 @@ jobs:
         run: zig build test -fstage1 -Dcpu=native
       - name: Run Bench cpu=native
         run: zig build bench -fstage1 -Dcpu=native
-      - name : Run perf stat
-        run: |
-          zig build perf -fstage1 -Dcpu=native
-          perf stat ./zig-out/bin/perf record ./zig-out/bin/perf
-      - uses: actions/upload-artifact@v3
-        with:
-          name: perf.data
-          path: ./perf.data
   Build:
     runs-on: ubuntu-latest
     steps:
