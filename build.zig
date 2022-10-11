@@ -96,7 +96,6 @@ pub fn build(b: *std.build.Builder) void {
         exe.setTarget(target);
         exe.setBuildMode(std.builtin.Mode.ReleaseFast);
         exe.addPackage(othello);
-        exe.addPackage(bench);
         exe.addPackage(testing);
 
         // exe.install();
