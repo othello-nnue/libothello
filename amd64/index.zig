@@ -6,16 +6,13 @@ pub const INDEX = @import("utils").make_array([4]u9, index);
 fn index(pos: u6) [4]u9 {
     const a = @truncate(u3, pos);
     const b = @truncate(u3, pos >> 3);
-    var c: u4 = min(b, max(a, 7 - a));
-    if (a == 3 or a == 4) {
-        c = @as(u4, a) + if (b > 3) @as(u4, 7) else @as(u4, 5);
-    }
-    if (pos == 2 or pos == 10) {
-        c = 2;
-    }
-    if (pos == 61 or pos == 53) {
-        c = 5;
-    }
+    const c = switch (pos) {
+        2, 10, 53, 61 => a,
+        else => switch (a) {
+            3, 4 => a + @as(u4, if (b > 3) 7 else 5),
+            else => min(b, max(a, 7 - a)),
+        },
+    };
     return .{
         HELPER[a],
         HELPER[b],

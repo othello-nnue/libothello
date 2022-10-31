@@ -1,7 +1,5 @@
 fn res(i: u3, p: u7, n: u7) u7 {
     const m = (@as(u7, 1) << i) - 1;
-    if (p & (n >> 1 & ~m | (n << 1 & m)) != 0)
-        return 0;
 
     return m & -%(@as(u7, 1) << (7 - @clz(~n & m)) & p) |
         ((n >> i) + 1 & p >> i << 1) -| 1 << i;
@@ -18,17 +16,13 @@ fn special(i: u2, p: u5, n: u5) u5 {
     }
 }
 fn gen(mask: u5, p: u5, n: u5, is_up: bool) u5 {
-    if (is_up) {
-        const nn = @as(u6, n | ~mask) + 1;
-        const nnn = @intCast(u5, (nn & -%nn) - 1);
-        if (nnn & p & mask == 0) return 0;
-        return nnn & mask;
-    } else {
-        const nn = @truncate(u5, @as(u6, 1) << (5 - @clz(~n & mask)));
-        if (p & mask & -%nn != 0) {
-            return -%nn & mask;
-        } else return 0;
-    }
+    const nn = ~n & mask;
+    const nnn = mask & ~if (is_up)
+        -%(nn & -%nn)
+    else
+        @as(u6, 31) >> @clz(nn);
+    if (nnn & p == 0) return 0;
+    return @intCast(u5, nnn);
 }
 
 pub const RESULT = init: {
