@@ -30,9 +30,9 @@ fn _mask(pos: u6) [4][2]u64 {
         t = mul(0xFF, 0xF8);
     } else if (u == 5 and pos <= 45) {
         t = mul(0xFF, 0x1F);
-    } else if (pos == 19 or pos == 20) {
+    } else if (pos / 3 == 6) {
         t = mul(0xF8, 0xFF);
-    } else if (pos == 43 or pos == 44) {
+    } else if (pos / 3 == 14) {
         t = mul(0x1F, 0xFF);
     }
 
