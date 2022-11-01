@@ -1,28 +1,15 @@
-fn res(i: u3, p: u7, n: u7) u7 {
-    const m = (@as(u7, 1) << i) - 1;
-
-    return m & -%(@as(u7, 1) << (7 - @clz(~n & m)) & p) |
-        ((n >> i) + 1 & p >> i << 1) -| 1 << i;
+fn general(m: u8, p: u6, n: u6) u6 {
+    return gen(@truncate(u5, ~m), p, n, m & 64 != 0) | gen(@truncate(u6, m), p, n, m & 128 != 0);
 }
 
-const gen_mask = [4]u5{ 0b00101, 0b01010, 0b01010, 0b10100 };
-
-fn special(i: u2, p: u5, n: u5) u5 {
-    const mask = gen_mask[i];
-    if (i < 2) {
-        return gen(mask, p, n, true) | gen(~mask, p, n, true);
-    } else {
-        return gen(mask, p, n, false) | gen(~mask, p, n, false);
-    }
-}
-fn gen(mask: u5, p: u5, n: u5, is_up: bool) u5 {
+fn gen(mask: u6, p: u6, n: u6, is_up: bool) u6 {
     const nn = ~n & mask;
     const nnn = mask & ~if (is_up)
         -%(nn & -%nn)
     else
-        @as(u6, 31) >> @clz(nn);
+        @as(u7, 63) >> @clz(nn);
     if (nnn & p == 0) return 0;
-    return @intCast(u5, nnn);
+    return @intCast(u6, nnn);
 }
 
 pub const RESULT = init: {
@@ -30,23 +17,15 @@ pub const RESULT = init: {
     var ret: [0x4000]u6 = undefined;
 
     for (@import("index.zig").HELPER) |i, index| {
-        const range: u7 = switch (index) {
+        const range = ret[0..switch (index) {
             0, 7 => 64,
             else => 32,
-        };
+        }];
 
-        var j: u7 = 0;
-        while (j < range) : (j += 1) {
-            var k: u7 = 0;
-            while (k < range) : (k += 1) {
-                const ii = @as(u64, i + 2 * j) * 32 + k;
-                if (index < 8) {
-                    const ind: u3 = @intCast(u3, index -| 1);
-                    ret[ii] = @intCast(u6, res(ind, j, k));
-                } else {
-                    ret[ii] = special(@intCast(u2, index - 8), j, k);
-                }
-            }
+        const mask = @truncate(u8, 0x140ACAC5_7F5F4F47434140BF >> (8 * index));
+        for (range) |_, j| {
+            for (range) |_, k|
+                ret[@as(u64, i) * 32 + j * 64 + k] = general(mask, j, k);
         }
     }
 
