@@ -24,19 +24,17 @@ fn _mask(pos: u6) [4][2]u64 {
         return [_][2]u64{.{ 0, 0 }} ** 4;
     }
 
-    var t = ~@as(u64, 0);
-    const u = @truncate(u3, pos);
-    if (u == 2 and pos >= 18) {
-        t = mul(0xFF, 0xF8);
-    } else if (u == 5 and pos <= 45) {
-        t = mul(0xFF, 0x1F);
-    } else if (pos / 3 == 6) {
-        t = mul(0xF8, 0xFF);
-    } else if (pos / 3 == 14) {
-        t = mul(0x1F, 0xFF);
-    }
-
+    const t: u64 = switch (pos) {
+        2, 10, 53, 61 => 0,
+        19, 20 => mul(0x07, 0xFF),
+        43, 44 => mul(0xE0, 0xFF),
+        else => switch (pos & 7) {
+            2 => mul(0xFF, 0x07),
+            5 => mul(0xFF, 0xE0),
+            else => 0,
+        },
+    };
     const temp = mask(pos, 7) | mask(pos, 9);
     const tt = @splat(2, t);
-    return .{ mask(pos, 1), mask(pos, 8), temp & tt, temp & ~tt };
+    return .{ mask(pos, 1), mask(pos, 8), temp & ~tt, temp & tt };
 }
