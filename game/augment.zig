@@ -5,16 +5,15 @@ fn deltaswap(bits: u64, shift: u6, mask: u64) u64 {
 }
 
 fn vert(x: u64) u64 {
-    return @byteSwap(u64, x);
+    return @byteSwap(x);
 }
 
 fn hori(x: u64) u64 {
-    //return @byteSwap(u64, @bitReverse(u64, x));
-    return @bitReverse(u64, @byteSwap(u64, x));
+    return @bitReverse(@byteSwap(x));
 }
 
 fn rot(x: u64) u64 {
-    return @bitReverse(u64, x);
+    return @bitReverse(x);
 }
 
 fn diag(x: u64) u64 {
